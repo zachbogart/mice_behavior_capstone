@@ -8,12 +8,11 @@
 # Fixed path issues in load_data and chnaged opening to 'with open'
 # Fixed problems with calcPosition
 
-import tarfile
-
-from matplotlib.pylab import *
-
-import Util
+import Util, tarfile, os, sys
+import numpy as np
+import cPickle as pickle
 from video_analysis import vidtools
+from matplotlib.pylab import *
 
 path_analysis = "20130101_170151_EPM_BWPOF2_841_F/analysis/238-9578_seg200_man-thresh-0.250-timepoint"
 
@@ -21,9 +20,9 @@ def load_data(conditions_folder, start_frame=None, end_frame=None, ext='.zones.d
     '''
     INPUT: This function takes a conditions_folder (string), e.g. '20130202_163641_EPM_BWPOF2_1403_F/analysis/900-7725_man-thresh-0.250',
     and an extension for the zones dictionary (string), which by default is '.zones.dict'
-    OUTPUT: Returns miceols_list, a comprehensive list of mice outlines coordinates, frame by frame; 
+    OUTPUT: Returns miceols_list, a comprehensive list of mice outlines coordinates, frame by frame;
     zones_masks, a dictionary with EPM zones masks; and
-    shape, the shape of the video. 
+    shape, the shape of the video.
     '''
 
     an_dir = os.path.abspath(conditions_folder)
@@ -93,7 +92,7 @@ def arm_entry(results_array, zones_order):
     # Arm entries version from 20130829 10:10 am. Doesn't capture extra events anymore. Seems accurate now.
     arm_entries = [[], [], [], [], [], [], [], [], []]
     for frame in range(len(results_array) - 1):
-        # Compare each arm, one by one to the middle 
+        # Compare each arm, one by one to the middle
         for zone in [4, 6, 7, 8]:  # 4,6,7,8 are the arms
             if results_array[
                 frame, 5] > 0:  # 5 is the middle area. Arm antries can only occur if a mouse was present in the middle.
@@ -182,14 +181,14 @@ def smooth(x, window_len=10, window='flat'):
     '''
     from http://wiki.scipy.org/Cookbook/SignalSmooth
     smooth the data using a window with requested size.
-    
+
     This method is based on the convolution of a scaled window with the signal.
-    The signal is prepared by introducing reflected copies of the signal 
+    The signal is prepared by introducing reflected copies of the signal
     (with the window size) in both ends so that transient parts are minimized
     in the begining and end part of the output signal.
-    
+
     input:
-        x: the input signal 
+        x: the input signal
         window_len: the dimension of the smoothing window; should be an odd integer
         window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
             flat window will produce a moving average smoothing.
