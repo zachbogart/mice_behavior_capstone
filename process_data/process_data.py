@@ -5,6 +5,7 @@ import os
 import json
 import pandas as pd
 
+
 class NoDataError(Exception):
     pass
 
@@ -38,7 +39,6 @@ def process_directory(parentDirectory, mouseDirectory):
     #         end_frame = (sys.argv[
     #             3]) * 30  # Substract 15 because Brant tracking starts tracking videos 15 seconds in. Multiply by 30 fps
 
-    # print >> sys.stdout, 'Loading data for', conditions_folder
     mice_ols, zones_masks, shape = load_data(conditions_folder_path, start_frame, end_frame)
     # Make a mask of all the EPM zones (those that don't start with 'F', for floor)
     print >> sys.stdout, 'Calculating residency in arms'
@@ -117,5 +117,3 @@ def main():
 
 
 main()
-
-# process_folder()
