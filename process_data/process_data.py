@@ -3,7 +3,7 @@ from EPM_analysis import *
 import sys
 import os
 import json
-
+import pandas as pd
 
 class NoDataError(Exception):
     pass
@@ -85,6 +85,18 @@ def getMouseDirectories():
     return parentDirectory, mouseDirectories
 
 
+def unnestDict(dictionary):
+    result = {}
+    for key in dictionary.keys():
+        if key != 'arm_entries':
+            if isinstance(dictionary[key], dict):
+                for key2 in dictionary[key].keys():
+                    result[key + '_' + key2] = dictionary[key][key2]
+            else:
+                result[key] = dictionary[key]
+    return result
+
+
 def main():
     parentDirectory, mouseDirectories = getMouseDirectories()
     i = 0
@@ -95,11 +107,13 @@ def main():
             break
         try:
             mouseResults = process_directory(parentDirectory, mouseDirectory)
-            aggregateResults.append(mouseResults)
+            flatResults = unnestDict(mouseResults)
+            aggregateResults.append(flatResults)
         except NoDataError, e:
             print('Exception: {}'.format(e))
-    with open('aggregate_results.json', 'w') as fp:
-        json.dump(aggregateResults, fp)
+    # with open('aggregate_results.json', 'w') as fp:
+    #     #     json.dump(aggregateResults, fp)
+    pd.DataFrame(aggregateResults).to_csv('aggregate_results.csv')
 
 
 main()
