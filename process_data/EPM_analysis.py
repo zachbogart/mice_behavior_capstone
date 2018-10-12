@@ -13,6 +13,7 @@ import numpy as np
 import cPickle as pickle
 import vidtools
 from pylab import *
+import pandas as pd
 
 
 def load_data(conditions_folder_path, start_frame=None, end_frame=None, ext='.zones.dict'):
@@ -148,6 +149,10 @@ def calcPosition(shape, filled_in_mice_ols, zones_order, results_array):
 
     # Split centroids into arcs of consecutive presence in an arm
     # Make dictionary that will hold the position of the mice
+
+    # centroidDF = pd.DataFrame(centroids)
+    # centroidDF.to_csv('centroids.csv')
+
     arcs_in_arms = {}
     for z in zones_order:
         arcs_in_arms[z] = [[]]
