@@ -15,7 +15,7 @@ import vidtools
 from pylab import *
 
 
-def load_data(conditions_folder, start_frame=None, end_frame=None, ext='.zones.dict'):
+def load_data(conditions_folder_path, start_frame=None, end_frame=None, ext='.zones.dict'):
     '''
     INPUT: This function takes a conditions_folder (string), e.g. '20130202_163641_EPM_BWPOF2_1403_F/analysis/900-7725_man-thresh-0.250',
     and an extension for the zones dictionary (string), which by default is '.zones.dict'
@@ -24,7 +24,7 @@ def load_data(conditions_folder, start_frame=None, end_frame=None, ext='.zones.d
     shape, the shape of the video. 
     '''
 
-    an_dir = os.path.abspath(conditions_folder)
+    an_dir = conditions_folder_path
 
     # Make a single list containing mice outlines in all tracked frames
     mice_ols = []
@@ -54,21 +54,21 @@ def load_data(conditions_folder, start_frame=None, end_frame=None, ext='.zones.d
     return mice_ols[start_frame:end_frame], zones_masks, shape
 
 
-def in_EPM(ol, EPMzones):
-    '''
-    Takes a frame with outlines and returns the outlines within the EPMzones
-    '''
-    y, x = zip(*ol)  # y,x because coordinates are reversed in the outlines tuples
-    return (EPMzones[x, y]).any()
-
-
 def filter_mice_ols(mice_ols, EPMzones):
     '''
     Takes a list of frames with outlines and filters it, returning only the frames in EPMzones
     '''
+
+    def in_EPM(ol):
+        '''
+        Takes a frame with outlines and returns the outlines within the EPMzones
+        '''
+        y, x = zip(*ol)  # y,x because coordinates are reversed in the outlines tuples
+        return (EPMzones[x, y]).any()
+
     mice_ols_in_EPMzones = []
     for ol in mice_ols:
-        mice_ols_in_EPMzones.append(filter(in_EPM, (ol, EPMzones)))
+        mice_ols_in_EPMzones.append(filter(in_EPM, ol))
     return mice_ols_in_EPMzones
 
 
@@ -84,7 +84,7 @@ def mouse_position_in_zones(mice_ols, shape, zones_order, zones_masks, results_a
         for j, z in enumerate(zones_order):
             results_array[i, j] = mask[zones_masks[z]].sum()
         if i % 100 == 0:
-            print >> sys.stderr, "\r%s" % i,
+            print >> sys.stdout, "\r%s" % i,
 
 
 def arm_entry(results_array, zones_order):
@@ -216,7 +216,7 @@ def smooth(x, window_len=10, window='flat'):
     return smoothed
 
 
-def results(zones_order, results_array, start_frame, end_frame, conditions_folder):
+def calculateResults(zones_order, results_array, start_frame, end_frame, conditions_folder):
     tot = float(sum([a.sum() for a in results_array[start_frame:end_frame].transpose()]))
     # pixels_in_zones can assign 'residence time' to multiple zones if mouse is in multiple zones at a time
     pixels_in_zones = dict(zip(zones_order, [a.sum() / tot for a in results_array[start_frame:end_frame].transpose()]))
@@ -251,7 +251,7 @@ def results(zones_order, results_array, start_frame, end_frame, conditions_folde
     xlabel('minutes')
     ylabel('number of mouse pixels')
     # savefig
-    savefig(conditions_folder + '/arm_residence_entries.pdf')
+    # savefig(conditions_folder + '/arm_residence_entries.pdf') # TODO: Why are we saving this?
     close(1)
 
     return frac_in_arms, tot_arm_entries, frames_in_arms, arm_entries  # ,xplor_frac
@@ -283,41 +283,3 @@ def saveResults(conditions_folder, results_array, frac_in_arms, arm_entries, tot
     # open(conditions_folder+'/smoothedDistance.dict', 'w').write(smoothed_distance.__repr__())
     # open(conditions_folder+'/medianSpeed.dict', 'w').write(median_speed.__repr__())
     # open(conditions_folder+'/smoothedMedianSpeed.dict', 'w').write(smoothed_median_speed.__repr__())
-
-# if __name__ == "__main__":
-#     # Supply folder to analyze and, optional, analysis start in seconds, analysis end in seconds.
-#     conditions_folder = sys.argv[1]
-#     start_frame = 0
-#     end_frame = None
-#     if len(sys.argv)>2:
-#         start_frame = (sys.argv[2])*30 #Substract 15 because Brant tracking starts tracking videos 15 seconds in. Multiply by 30 fps
-#         if len(sys.argv)>3:
-#             end_frame = (sys.argv[3])*30 #Substract 15 because Brant tracking starts tracking videos 15 seconds in. Multiply by 30 fps
-#     print >> sys.stderr, 'Loading data for', conditions_folder
-#     mice_ols,zones_masks,shape = load_data(conditions_folder,start_frame,end_frame)
-#     # Make a mask of all the EPM zones (those that don't start with 'F', for floor)
-#     print >> sys.stderr, 'Calculating residency in arms'
-#     EPMzones = reduce(lambda x,y: x+y, [zones_masks[k] for k in zones_masks if not k.startswith('F')])
-#     #
-#     mice_ols_in_EPMzones = filter_mice_ols(mice_ols)
-#     filled_in_mice_ols = fill_in_missing_outlines(mice_ols_in_EPMzones)
-#     zones_order, results_array = initialize_results_array(zones_masks,filled_in_mice_ols)
-#     mouse_position_in_zones(filled_in_mice_ols,shape,zones_order,zones_masks,results_array)
-#     frac_in_arms,tot_arm_entries,frames_in_arms,arm_entries = results(zones_order,results_array,start_frame,end_frame,conditions_folder)
-#     arcs_in_arms = calcPosition(shape,filled_in_mice_ols)
-#
-#     print >> sys.stderr, 'Calculating distance travelled'
-#     distance,total_distance = calcDistance(arcs_in_arms) # In pixels
-#     smoothed_distance = {k:smooth(np.array(v)) for k,v in distance.items()}
-#     total_smoothed_distance = {k:np.sum(v) for k,v in smoothed_distance.items()}
-#
-#     # Speed in pixels per second
-#
-#     print >> sys.stderr, 'Calculating speed'
-#     fps = 30.083 # Median frames per seconds of >2000 EPM videos
-#     median_speed = {k:np.median(v)*fps for k,v in distance.items()}
-#     smoothed_median_speed = {k:np.median(v)*fps for k,v in smoothed_distance.items()}
-#
-#     print >> sys.stderr, 'Saving results'
-#     saveResults(conditions_folder,results_array,frac_in_arms,arm_entries,tot_arm_entries,frames_in_arms, \
-#         total_distance,total_smoothed_distance,median_speed,smoothed_median_speed)
