@@ -13,6 +13,10 @@ class NoDataError(Exception):
 def process_directory(parentDirectory, mouseDirectory):
     print('')
     print('Loading data for {}'.format(mouseDirectory))
+
+    if not os.path.isfile(os.path.join(parentDirectory, mouseDirectory, '{}.zones.dict'.format(mouseDirectory))):
+        raise NoDataError('No .zones.dict inside conditions directory for: {}'.format(mouseDirectory))
+
     analysisDirectory = os.path.join(parentDirectory, mouseDirectory, 'analysis')
     if os.path.isdir(analysisDirectory):
         innerDirectories = os.listdir(analysisDirectory)
@@ -102,9 +106,9 @@ def main():
     i = 0
     aggregateResults = []
     for mouseDirectory in mouseDirectories:
-        i += 1
-        if i >= 15:
-            break
+        # i += 1
+        # if i >= 15:
+        #     break
         try:
             mouseResults = process_directory(parentDirectory, mouseDirectory)
             flatResults = unnestDict(mouseResults)
@@ -113,7 +117,7 @@ def main():
             print('Exception: {}'.format(e))
     # with open('aggregate_results.json', 'w') as fp:
     #     #     json.dump(aggregateResults, fp)
-    pd.DataFrame(aggregateResults).to_csv('aggregate_results.csv')
+    pd.DataFrame(aggregateResults).to_csv('aggregate_results_new.csv')
 
 
 main()

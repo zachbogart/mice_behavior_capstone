@@ -1,9 +1,9 @@
-pydev debugger: process 82581 is connecting
-
+/Users/bogart/Documents/Zach/Columbia/fall_2018/capstone/mice_behavior_capstone/process_data/vidtools.py:5: UserWarning: shapely import failed (likely pylab conflict); shapely features unavailable
+  warnings.warn('shapely import failed (likely pylab conflict); shapely features unavailable')
 opencv bindings import failed; disabled
 
 Loading data for 20121116_150819_EPM_BW_229
-Exception: No directories found inside analysis directory for: 20121116_150819_EPM_BW_229
+Exception: No analysis directory found for: 20121116_150819_EPM_BW_229
 
 Loading data for 20121116_150819_EPM_BW_229_F
 Exception: No analysis directory found for: 20121116_150819_EPM_BW_229_F
@@ -12,25 +12,950 @@ Loading data for 20121116_153006_EPM_BW_224
 Exception: No analysis directory found for: 20121116_153006_EPM_BW_224
 
 Loading data for 20121116_153006_EPM_BW_224_F
-Traceback (most recent call last):
-  File "/Applications/PyCharm CE.app/Contents/helpers/pydev/pydevd.py", line 1664, in <module>
-    main()
-  File "/Applications/PyCharm CE.app/Contents/helpers/pydev/pydevd.py", line 1658, in main
-    globals = debugger.run(setup['file'], None, None, is_module)
-  File "/Applications/PyCharm CE.app/Contents/helpers/pydev/pydevd.py", line 1068, in run
-    pydev_imports.execfile(file, globals, locals)  # execute the script
-  File "/Users/joshfeldman/Desktop/Projects/mice_behavior_capstone/process_data/process_data.py", line 119, in <module>
-    main()
-  File "/Users/joshfeldman/Desktop/Projects/mice_behavior_capstone/process_data/process_data.py", line 109, in main
-    mouseResults = process_directory(parentDirectory, mouseDirectory)
-  File "/Users/joshfeldman/Desktop/Projects/mice_behavior_capstone/process_data/process_data.py", line 42, in process_directory
-    mice_ols, zones_masks, shape = load_data(conditions_folder_path, start_frame, end_frame)
-  File "/Users/joshfeldman/Desktop/Projects/mice_behavior_capstone/process_data/EPM_analysis.py", line 34, in load_data
-    ols = Util.tar2obj(m.name, tarh)
-  File "/Users/joshfeldman/Desktop/Projects/mice_behavior_capstone/process_data/Util.py", line 34, in tar2obj
-    obj = eval_fn(objstr)
-  File "<string>", line 1, in <module>
-  File "_pydevd_bundle/pydevd_cython_darwin_27_64.pyx", line 1024, in _pydevd_bundle.pydevd_cython_darwin_27_64.ThreadTracer.__call__
-  File "/Applications/PyCharm CE.app/Contents/helpers/pydev/_pydev_bundle/pydev_is_thread_alive.py", line 14, in is_thread_alive
-    def is_thread_alive(t):
-KeyboardInterrupt
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121116_161742_EPM_BW_734_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+/anaconda3/envs/capstone/lib/python2.7/site-packages/numpy/core/fromnumeric.py:2920: RuntimeWarning: Mean of empty slice.
+  out=out, **kwargs)
+/anaconda3/envs/capstone/lib/python2.7/site-packages/numpy/core/_methods.py:85: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+Results found
+
+Loading data for 20121116_163845_EPM_BW_735_3000-16500_man-thresh-0.250_TEST
+Exception: No analysis directory found for: 20121116_163845_EPM_BW_735_3000-16500_man-thresh-0.250_TEST
+
+Loading data for 20121116_163845_EPM_BW_735_M
+Exception: No analysis directory found for: 20121116_163845_EPM_BW_735_M
+
+Loading data for 20121121_151056_EPM_BWPOF2_767
+Exception: No analysis directory found for: 20121121_151056_EPM_BWPOF2_767
+
+Loading data for 20121121_151056_EPM_BWPOF2_767_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121121_152045_EPM_BWPOF2_770
+Exception: No .zones.dict inside conditions directory for: 20121121_152045_EPM_BWPOF2_770
+
+Loading data for 20121121_152045_EPM_BWPOF2_770_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121121_153325_EPM_PO_761
+Exception: No analysis directory found for: 20121121_153325_EPM_PO_761
+
+Loading data for 20121121_153325_EPM_PO_761_F
+Exception: No miceols.tar inside conditions directory for: 20121121_153325_EPM_PO_761_F
+
+Loading data for 20121121_154633_EPM_PO_759
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121121_154633_EPM_PO_759_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121121_155926_EPM_PO_760
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121121_160958_EPM_PO_758_3875-10500_man-thresh-0.250_TEST
+Exception: No analysis directory found for: 20121121_160958_EPM_PO_758_3875-10500_man-thresh-0.250_TEST
+
+Loading data for 20121121_160958_EPM_PO_758_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121126_153825_EPM_BWPOF2_768_M
+Exception: No analysis directory found for: 20121126_153825_EPM_BWPOF2_768_M
+
+Loading data for 20121126_155122_EPM_BWPOF2_771_M
+Exception: No analysis directory found for: 20121126_155122_EPM_BWPOF2_771_M
+
+Loading data for 20121126_160155_EPM_BWPOF2_769_M
+Exception: No analysis directory found for: 20121126_160155_EPM_BWPOF2_769_M
+
+Loading data for 20121126_161311_EPM_BWPOF2_772_M
+Exception: No analysis directory found for: 20121126_161311_EPM_BWPOF2_772_M
+
+Loading data for 20121128_165620_EPM_BWPOF1_777_F
+Exception: No miceols.tar inside conditions directory for: 20121128_165620_EPM_BWPOF1_777_F
+
+Loading data for 20121128_170616_EPM_BWPOF1_779_F
+Exception: No analysis directory found for: 20121128_170616_EPM_BWPOF1_779_F
+
+Loading data for 20121130_162726_EPM_BWPOF1_786_M
+Exception: No miceols.tar inside conditions directory for: 20121130_162726_EPM_BWPOF1_786_M
+
+Loading data for 20121130_163816_EPM_BWPOF1_784_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121207_154246_EPM_BWPOF2_799_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121207_155944_EPM_BWPOF2_797_M
+Exception: No directories found inside analysis directory for: 20121207_155944_EPM_BWPOF2_797_M
+
+Loading data for 20121216_163043_EPM_BWPOF2_813_M
+Exception: No miceols.tar inside conditions directory for: 20121216_163043_EPM_BWPOF2_813_M
+
+Loading data for 20121216_164331_EPM_BWPOF2_814_M
+Exception: No .zones.dict inside conditions directory for: 20121216_164331_EPM_BWPOF2_814_M
+
+Loading data for 20121217_164326_EPM_BWPOF1_805_F
+Exception: No miceols.tar inside conditions directory for: 20121217_164326_EPM_BWPOF1_805_F
+
+Loading data for 20121217_165902_EPM_BWPOF1_823_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121217_171649_EPM_BWPOF1_824_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121217_172817_EPM_BWPOF1_825_M
+Exception: No .zones.dict inside conditions directory for: 20121217_172817_EPM_BWPOF1_825_M
+
+Loading data for 20121217_174331_EPM_BW_831_M
+Exception: No .zones.dict inside conditions directory for: 20121217_174331_EPM_BW_831_M
+
+Loading data for 20121218_160153_EPM_BW_810_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121218_165314_EPM_BW_808_M
+Exception: No .zones.dict inside conditions directory for: 20121218_165314_EPM_BW_808_M
+
+Loading data for 20121218_170704_EPM_BWPOF1_806_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121219_144948_EPM_PO_820_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121219_150212_EPM_PO_819_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121219_151406_EPM_PO_832_F
+Exception: No analysis directory found for: 20121219_151406_EPM_PO_832_F
+
+Loading data for 20121219_152752_EPM_PO_835_M
+Exception: No .zones.dict inside conditions directory for: 20121219_152752_EPM_PO_835_M
+
+Loading data for 20121219_162004_EPM_PO_821_M
+Exception: No analysis directory found for: 20121219_162004_EPM_PO_821_M
+
+Loading data for 20121220_110925_EPM_BWPOF2_816_F
+Exception: No .zones.dict inside conditions directory for: 20121220_110925_EPM_BWPOF2_816_F
+
+Loading data for 20121221_104739_EPM_BWPOF2_826_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20121231_143550_EPM_BWPOF2_844_M
+Exception: No .zones.dict inside conditions directory for: 20121231_143550_EPM_BWPOF2_844_M
+
+Loading data for 20121231_145913_EPM_BWPOF2_843_M
+Exception: No analysis directory found for: 20121231_145913_EPM_BWPOF2_843_M
+
+Loading data for 20130101_164945_EPM_BWPOF2_840_F
+Exception: No .zones.dict inside conditions directory for: 20130101_164945_EPM_BWPOF2_840_F
+
+Loading data for 20130101_171646_EPM_BWPOF2_842_M
+Exception: No miceols.tar inside conditions directory for: 20130101_171646_EPM_BWPOF2_842_M
+
+Loading data for 20130101_173151_EPM_BWPOF2_839_M
+Exception: No analysis directory found for: 20130101_173151_EPM_BWPOF2_839_M
+
+Loading data for 20130101_173836_EPM_BWPOF2_847_M
+Exception: No miceols.tar inside conditions directory for: 20130101_173836_EPM_BWPOF2_847_M
+
+Loading data for 20130101_175146_EPM_BWPOF2_839_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130101_180404_EPM_BWPOF2_861_M
+Exception: No analysis directory found for: 20130101_180404_EPM_BWPOF2_861_M
+
+Loading data for 20130102_161450_EPM_PO_851_M
+Exception: No analysis directory found for: 20130102_161450_EPM_PO_851_M
+
+Loading data for 20130102_161748_EPM_PO_851_M
+Exception: No .zones.dict inside conditions directory for: 20130102_161748_EPM_PO_851_M
+
+Loading data for 20130102_165615_EPM_PO_850_F
+Exception: No .zones.dict inside conditions directory for: 20130102_165615_EPM_PO_850_F
+
+Loading data for 20130102_174419_EPM_BW_849_M
+Exception: No .zones.dict inside conditions directory for: 20130102_174419_EPM_BW_849_M
+
+Loading data for 20130104_123723_EPM_BWPOF2_863_M
+Exception: No miceols.tar inside conditions directory for: 20130104_123723_EPM_BWPOF2_863_M
+
+Loading data for 20130109_152040_EPM_BWPOF2_1180_F
+Exception: No analysis directory found for: 20130109_152040_EPM_BWPOF2_1180_F
+
+Loading data for 20130109_154346_EPM_BWPOF2_1178_F
+Exception: No analysis directory found for: 20130109_154346_EPM_BWPOF2_1178_F
+
+Loading data for 20130109_160700_EPM_BWPOF2_1183_M
+Exception: No analysis directory found for: 20130109_160700_EPM_BWPOF2_1183_M
+
+Loading data for 20130110_131113_EPM_BWPOF1_1186_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130111_115436_EPM_BWPOF1_1189_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130114_103529_EPM_BWPOF2_1191_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130114_104632_EPM_BWPOF2_1193_M
+Exception: No miceols.tar inside conditions directory for: 20130114_104632_EPM_BWPOF2_1193_M
+
+Loading data for 20130114_104814_EPM_BWPOF2_1193_M
+Exception: No miceols.tar inside conditions directory for: 20130114_104814_EPM_BWPOF2_1193_M
+
+Loading data for 20130114_111227_EPM_BWPOF2_1190_F
+Exception: No miceols.tar inside conditions directory for: 20130114_111227_EPM_BWPOF2_1190_F
+
+Loading data for 20130114_112449_EPM_BWPOF2_1215_F
+Exception: No miceols.tar inside conditions directory for: 20130114_112449_EPM_BWPOF2_1215_F
+
+Loading data for 20130114_114806_EPM_BWPOF2_1216_F
+Exception: No .zones.dict inside conditions directory for: 20130114_114806_EPM_BWPOF2_1216_F
+
+Loading data for 20130114_115023_EPM_BWPOF2_1216_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130114_120233_EPM_BWPOF2_1262_F
+Exception: No .zones.dict inside conditions directory for: 20130114_120233_EPM_BWPOF2_1262_F
+
+Loading data for 20130115_152438_EPM_BWPOF2_1266_F
+Exception: No analysis directory found for: 20130115_152438_EPM_BWPOF2_1266_F
+
+Loading data for 20130115_155049_EPM_BWPOF2_1268_M
+Exception: No miceols.tar inside conditions directory for: 20130115_155049_EPM_BWPOF2_1268_M
+
+Loading data for 20130115_170933_EPM_BWPOF2_1217_M
+Exception: No directories found inside analysis directory for: 20130115_170933_EPM_BWPOF2_1217_M
+
+Loading data for 20130115_172133_EPM_BWPOF2_1267_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130115_174515_EPM_BWPOF2_1219_M
+Exception: No analysis directory found for: 20130115_174515_EPM_BWPOF2_1219_M
+
+Loading data for 20130116_135216_EPM_BWPOF1_1221_F
+Exception: No .zones.dict inside conditions directory for: 20130116_135216_EPM_BWPOF1_1221_F
+
+Loading data for 20130117_111103_EPM_BW_1298_F
+Exception: No miceols.tar inside conditions directory for: 20130117_111103_EPM_BW_1298_F
+
+Loading data for 20130117_113511_EPM_PO_1277_F
+Exception: No analysis directory found for: 20130117_113511_EPM_PO_1277_F
+
+Loading data for 20130117_113810_EPM_PO_1277_F
+Exception: No .zones.dict inside conditions directory for: 20130117_113810_EPM_PO_1277_F
+
+Loading data for 20130117_113905_EPM_PO_1277_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130117_115105_EPM_PO_1276_F
+Exception: No analysis directory found for: 20130117_115105_EPM_PO_1276_F
+
+Loading data for 20130117_120606_EPM_BWPOF1_1284_F
+Exception: No analysis directory found for: 20130117_120606_EPM_BWPOF1_1284_F
+
+Loading data for 20130117_121738_EPM_BWPOF1_1286_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130117_122944_EPM_PO_1283_M
+Exception: No miceols.tar inside conditions directory for: 20130117_122944_EPM_PO_1283_M
+
+Loading data for 20130117_123409_EPM_PO_1283_M
+Exception: No analysis directory found for: 20130117_123409_EPM_PO_1283_M
+
+Loading data for 20130117_124631_EPM_PO_1282_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130117_125906_EPM_PO_1280_F
+Exception: No .zones.dict inside conditions directory for: 20130117_125906_EPM_PO_1280_F
+
+Loading data for 20130117_130400_EPM_PO_1280_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130117_131551_EPM_PO_1279_F
+Exception: No analysis directory found for: 20130117_131551_EPM_PO_1279_F
+
+Loading data for 20130118_104857_EPM_BWPOF2_1295_F
+Exception: No analysis directory found for: 20130118_104857_EPM_BWPOF2_1295_F
+
+Loading data for 20130118_110013_EPM_BWPOF2_1296_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130118_112513_EPM_PO_1281_F
+Exception: No analysis directory found for: 20130118_112513_EPM_PO_1281_F
+
+Loading data for 20130118_112808_EPM_PO_1281_F
+Exception: No miceols.tar inside conditions directory for: 20130118_112808_EPM_PO_1281_F
+
+Loading data for 20130118_113032_EPM_PO_1281_F
+Exception: No miceols.tar inside conditions directory for: 20130118_113032_EPM_PO_1281_F
+
+Loading data for 20130118_113224_EPM_PO_1281_F
+Exception: No .zones.dict inside conditions directory for: 20130118_113224_EPM_PO_1281_F
+
+Loading data for 20130118_115336_EPM_BWPOF1_1288_M
+Exception: No analysis directory found for: 20130118_115336_EPM_BWPOF1_1288_M
+
+Loading data for 20130118_120524_EPM_BWPOF1_1287_M
+Exception: No analysis directory found for: 20130118_120524_EPM_BWPOF1_1287_M
+
+Loading data for 20130122_102843_EPM_BW_1291_F
+Exception: No analysis directory found for: 20130122_102843_EPM_BW_1291_F
+
+Loading data for 20130122_103912_EPM_BW_1292_F
+Exception: No analysis directory found for: 20130122_103912_EPM_BW_1292_F
+
+Loading data for 20130123_112930_EPM_BWPOF2_1316_M
+Exception: No miceols.tar inside conditions directory for: 20130123_112930_EPM_BWPOF2_1316_M
+
+Loading data for 20130123_114152_EPM_BWPOF2_1317_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130123_115226_EPM_BWPOF2_1318_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130123_120252_EPM_BWPOF2_1321_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130123_121646_EPM_BWPOF2_1320_M
+Exception: No analysis directory found for: 20130123_121646_EPM_BWPOF2_1320_M
+
+Loading data for 20130123_122045_EPM_BWPOF2_1320_M
+Exception: No miceols.tar inside conditions directory for: 20130123_122045_EPM_BWPOF2_1320_M
+
+Loading data for 20130123_122331_EPM_BWPOF2_1320_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130123_123408_EPM_BWPOF2_1319_M
+Exception: No analysis directory found for: 20130123_123408_EPM_BWPOF2_1319_M
+
+Loading data for 20130123_124726_EPM_PO_1278_M
+Exception: No .zones.dict inside conditions directory for: 20130123_124726_EPM_PO_1278_M
+
+Loading data for 20130123_124821_EPM_PO_1278_M
+Exception: No analysis directory found for: 20130123_124821_EPM_PO_1278_M
+
+Loading data for 20130124_102629_EPM_BWPOF2_1314_F
+Exception: No analysis directory found for: 20130124_102629_EPM_BWPOF2_1314_F
+
+Loading data for 20130124_103901_EPM_BWPOF2_1315_F
+Exception: No analysis directory found for: 20130124_103901_EPM_BWPOF2_1315_F
+
+Loading data for 20130124_105749_EPM_BWPOF2_1329_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130124_111142_EPM_BWPOF2_1328_F
+Exception: No analysis directory found for: 20130124_111142_EPM_BWPOF2_1328_F
+
+Loading data for 20130124_112528_EPM_BWPOF2_1327_F
+Exception: No analysis directory found for: 20130124_112528_EPM_BWPOF2_1327_F
+
+Loading data for 20130124_114155_EPM_BWPOF2_1330_M
+Exception: No analysis directory found for: 20130124_114155_EPM_BWPOF2_1330_M
+
+Loading data for 20130124_115637_EPM_BWPOF2_1331_M
+Exception: No miceols.tar inside conditions directory for: 20130124_115637_EPM_BWPOF2_1331_M
+
+Loading data for 20130124_125946_EPM_BWPOF2_1353_F
+Exception: No analysis directory found for: 20130124_125946_EPM_BWPOF2_1353_F
+
+Loading data for 20130124_131328_EPM_BWPOF2_1356_F
+Exception: No analysis directory found for: 20130124_131328_EPM_BWPOF2_1356_F
+
+Loading data for 20130124_132809_EPM_BWPOF2_1355_F
+Exception: No analysis directory found for: 20130124_132809_EPM_BWPOF2_1355_F
+
+Loading data for 20130124_134128_EPM_BWPOF2_1354_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130126_105753_EPM_BWPOF2_1332_F
+Exception: No analysis directory found for: 20130126_105753_EPM_BWPOF2_1332_F
+
+Loading data for 20130126_112043_EPM_BWPOF2_1334_M
+Exception: No analysis directory found for: 20130126_112043_EPM_BWPOF2_1334_M
+
+Loading data for 20130126_113424_EPM_BWPOF2_1333_M
+Exception: No analysis directory found for: 20130126_113424_EPM_BWPOF2_1333_M
+
+Loading data for 20130126_121844_EPM_BWPOF2_1366_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130126_124044_EPM_BWPOF2_1367_M
+Exception: No analysis directory found for: 20130126_124044_EPM_BWPOF2_1367_M
+
+Loading data for 20130129_143926_EPM_BW_1337_F
+Exception: No analysis directory found for: 20130129_143926_EPM_BW_1337_F
+
+Loading data for 20130129_145245_EPM_BW_1336_F
+Exception: No analysis directory found for: 20130129_145245_EPM_BW_1336_F
+
+Loading data for 20130129_150730_EPM_BW_1339_M
+Exception: No analysis directory found for: 20130129_150730_EPM_BW_1339_M
+
+Loading data for 20130129_152313_EPM_BW_1338_M
+Exception: No analysis directory found for: 20130129_152313_EPM_BW_1338_M
+
+Loading data for 20130129_155306_EPM_BW_1371_M
+Exception: No analysis directory found for: 20130129_155306_EPM_BW_1371_M
+
+Loading data for 20130129_160905_EPM_BW_1369_F
+Exception: No analysis directory found for: 20130129_160905_EPM_BW_1369_F
+
+Loading data for 20130129_162312_EPM_BW_1368_F
+Exception: No miceols.tar inside conditions directory for: 20130129_162312_EPM_BW_1368_F
+
+Loading data for 20130129_171216_EPM_PO_1326_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130129_172754_EPM_BWPOF1_1377_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130131_144544_EPM_BWPOF2_1385_F
+Exception: No miceols.tar inside conditions directory for: 20130131_144544_EPM_BWPOF2_1385_F
+
+Loading data for 20130131_154100_EPM_BWPOF2_1380_M
+Exception: No analysis directory found for: 20130131_154100_EPM_BWPOF2_1380_M
+
+Loading data for 20130131_155154_EPM_BWPOF2_1381_M
+Exception: No analysis directory found for: 20130131_155154_EPM_BWPOF2_1381_M
+
+Loading data for 20130201_132127_EPM_BWPOF2_1384_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130201_132634_EPM_BWPOF2_1384_F
+Exception: No analysis directory found for: 20130201_132634_EPM_BWPOF2_1384_F
+
+Loading data for 20130202_162140_EPM_BWPOF2_1384_F
+Exception: No directories found inside analysis directory for: 20130202_162140_EPM_BWPOF2_1384_F
+
+Loading data for 20130202_163641_EPM_BWPOF2_1403_F
+Exception: No directories found inside analysis directory for: 20130202_163641_EPM_BWPOF2_1403_F
+
+Loading data for 20130202_165111_EPM_BWPOF2_1405_M
+Exception: No miceols.tar inside conditions directory for: 20130202_165111_EPM_BWPOF2_1405_M
+
+Loading data for 20130202_170219_EPM_BWPOF2_1404_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130202_171317_EPM_BWPOF2_1406_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130206_134703_EPM_BWPOF2_1436_F
+Exception: No analysis directory found for: 20130206_134703_EPM_BWPOF2_1436_F
+
+Loading data for 20130206_135014_EPM_BWPOF2_1436_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130206_142509_EPM_BWPOF2_1440_F
+Exception: No analysis directory found for: 20130206_142509_EPM_BWPOF2_1440_F
+
+Loading data for 20130206_143620_EPM_BWPOF2_1437_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130206_144933_EPM_BWPOF2_1438_F
+Exception: No analysis directory found for: 20130206_144933_EPM_BWPOF2_1438_F
+
+Loading data for 20130206_150040_EPM_BWPOF2_1441_F
+Exception: No analysis directory found for: 20130206_150040_EPM_BWPOF2_1441_F
+
+Loading data for 20130206_151253_EPM_BWPOF2_1439_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130208_150245_EPM_BWPOF2_1488_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130210_111519_EPM_BWPOF2_1491_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130210_113156_EPM_BWPOF2_1489_F
+Exception: No .zones.dict inside conditions directory for: 20130210_113156_EPM_BWPOF2_1489_F
+
+Loading data for 20130210_114713_EPM_BWPOF2_1493_M
+Exception: No analysis directory found for: 20130210_114713_EPM_BWPOF2_1493_M
+
+Loading data for 20130210_120302_EPM_BWPOF2_1492_M
+Exception: No analysis directory found for: 20130210_120302_EPM_BWPOF2_1492_M
+
+Loading data for 20130210_125150_EPM_BWPOF2_1454_M
+Exception: No analysis directory found for: 20130210_125150_EPM_BWPOF2_1454_M
+
+Loading data for 20130210_125557_EPM_BWPOF2_1454_M
+Exception: No analysis directory found for: 20130210_125557_EPM_BWPOF2_1454_M
+
+Loading data for 20130213_163215_EPM_BWPOF2_1463_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130213_164559_EPM_BWPOF2_1465_M
+Exception: No analysis directory found for: 20130213_164559_EPM_BWPOF2_1465_M
+
+Loading data for 20130213_165903_EPM_BWPOF2_1464_M
+Exception: No miceols.tar inside conditions directory for: 20130213_165903_EPM_BWPOF2_1464_M
+
+Loading data for 20130213_174224_EPM_BW_1499_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130214_150255_EPM_BWPOF2_1460_M
+Exception: No analysis directory found for: 20130214_150255_EPM_BWPOF2_1460_M
+
+Loading data for 20130214_150606_EPM_BWPOF2_1460_M
+Exception: No analysis directory found for: 20130214_150606_EPM_BWPOF2_1460_M
+
+Loading data for 20130214_151740_EPM_BWPOF2_1459_F
+Exception: No analysis directory found for: 20130214_151740_EPM_BWPOF2_1459_F
+
+Loading data for 20130214_152926_EPM_BWPOF2_1458_F
+Exception: No analysis directory found for: 20130214_152926_EPM_BWPOF2_1458_F
+
+Loading data for 20130214_154203_EPM_BWPOF2_1462_M
+Exception: No miceols.tar inside conditions directory for: 20130214_154203_EPM_BWPOF2_1462_M
+
+Loading data for 20130214_155338_EPM_BWPOF2_1461_M
+Exception: No analysis directory found for: 20130214_155338_EPM_BWPOF2_1461_M
+
+Loading data for 20130214_155552_EPM_BWPOF2_1461_M
+Exception: No miceols.tar inside conditions directory for: 20130214_155552_EPM_BWPOF2_1461_M
+
+Loading data for 20130215_151225_EPM_BWPOF2_1496_M
+Exception: No miceols.tar inside conditions directory for: 20130215_151225_EPM_BWPOF2_1496_M
+
+Loading data for 20130215_152537_EPM_BWPOF2_1495_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130215_153927_EPM_BWPOF2_1494_M
+Exception: No analysis directory found for: 20130215_153927_EPM_BWPOF2_1494_M
+
+Loading data for 20130215_155417_EPM_BW_1417_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130215_161132_EPM_BWPOF1_1450_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130215_163018_EPM_BW_1498_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130216_151101_EPM_BWPOF2_1504_F
+Exception: No analysis directory found for: 20130216_151101_EPM_BWPOF2_1504_F
+
+Loading data for 20130216_152332_EPM_BWPOF2_1505_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130216_153444_EPM_BWPOF2_1507_M
+Exception: No miceols.tar inside conditions directory for: 20130216_153444_EPM_BWPOF2_1507_M
+
+Loading data for 20130216_154536_EPM_BWPOF2_1506_M
+Exception: No analysis directory found for: 20130216_154536_EPM_BWPOF2_1506_M
+
+Loading data for 20130216_155620_EPM_BWPOF2_2037_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130216_160725_EPM_BWPOF2_2035_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130216_162126_EPM_BWPOF2_2036_M
+Exception: No miceols.tar inside conditions directory for: 20130216_162126_EPM_BWPOF2_2036_M
+
+Loading data for 20130216_163505_EPM_BWPOF2_2034_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130217_163949_EPM_PO_2032_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130217_165332_EPM_PO_2040_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130217_165927_EPM_PO_2040_M
+Exception: No miceols.tar inside conditions directory for: 20130217_165927_EPM_PO_2040_M
+
+Loading data for 20130217_170806_EPM_PO_2039_M
+Exception: No analysis directory found for: 20130217_170806_EPM_PO_2039_M
+
+Loading data for 20130217_172054_EPM_PO_2031_M
+Exception: No analysis directory found for: 20130217_172054_EPM_PO_2031_M
+
+Loading data for 20130217_173502_EPM_BW_2067_M
+Exception: No analysis directory found for: 20130217_173502_EPM_BW_2067_M
+
+Loading data for 20130217_174848_EPM_BW_2071_M
+Exception: No analysis directory found for: 20130217_174848_EPM_BW_2071_M
+
+Loading data for 20130217_180101_EPM_BW_2066_M
+Exception: No analysis directory found for: 20130217_180101_EPM_BW_2066_M
+
+Loading data for 20130218_135212_EPM_BWPOF2_2049_F
+Exception: No .zones.dict inside conditions directory for: 20130218_135212_EPM_BWPOF2_2049_F
+
+Loading data for 20130218_135234_EPM_BWPOF2_2049_F
+Exception: No analysis directory found for: 20130218_135234_EPM_BWPOF2_2049_F
+
+Loading data for 20130218_140503_EPM_BWPOF2_2047_F
+Exception: No analysis directory found for: 20130218_140503_EPM_BWPOF2_2047_F
+
+Loading data for 20130218_141619_EPM_BWPOF2_2048_F
+Exception: No miceols.tar inside conditions directory for: 20130218_141619_EPM_BWPOF2_2048_F
+
+Loading data for 20130218_144111_EPM_BWPOF2_2072_F
+Exception: No analysis directory found for: 20130218_144111_EPM_BWPOF2_2072_F
+
+Loading data for 20130218_150933_EPM_BWPOF2_2064_M
+Exception: No analysis directory found for: 20130218_150933_EPM_BWPOF2_2064_M
+
+Loading data for 20130218_152103_EPM_BWPOF2_2075_M
+Exception: No analysis directory found for: 20130218_152103_EPM_BWPOF2_2075_M
+
+Loading data for 20130220_144403_EPM_BWPOF2_2076_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130220_145456_EPM_BWPOF2_2077_F
+Exception: No analysis directory found for: 20130220_145456_EPM_BWPOF2_2077_F
+
+Loading data for 20130220_150536_EPM_BWPOF2_2078_F
+Exception: No analysis directory found for: 20130220_150536_EPM_BWPOF2_2078_F
+
+Loading data for 20130220_151622_EPM_BWPOF2_2079_F
+Exception: No miceols.tar inside conditions directory for: 20130220_151622_EPM_BWPOF2_2079_F
+
+Loading data for 20130220_153516_EPM_BWPOF2_2080_M
+Exception: No analysis directory found for: 20130220_153516_EPM_BWPOF2_2080_M
+
+Loading data for 20130223_160458_EPM_PO_2054_M
+Exception: No analysis directory found for: 20130223_160458_EPM_PO_2054_M
+
+Loading data for 20130223_163720_EPM_PO_2055_M
+Exception: No analysis directory found for: 20130223_163720_EPM_PO_2055_M
+
+Loading data for 20130309_115455_EPM_BWPOF1_2137_F
+Exception: No analysis directory found for: 20130309_115455_EPM_BWPOF1_2137_F
+
+Loading data for 20130312_121528_EPM_BWPOF2_2198_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130316_144954_EPM_BWPOF2_2203_M
+Exception: No miceols.tar inside conditions directory for: 20130316_144954_EPM_BWPOF2_2203_M
+
+Loading data for 20130320_121759_EPM_BWPOF2_2312_M
+Exception: No analysis directory found for: 20130320_121759_EPM_BWPOF2_2312_M
+
+Loading data for 20130328_170309_EPM_BWPOF2_2362_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130328_175127_EPM_BWPOF2_2342_F
+Exception: No analysis directory found for: 20130328_175127_EPM_BWPOF2_2342_F
+
+Loading data for 20130403_140550_EPM_BWPOF2_2358_M
+Exception: No analysis directory found for: 20130403_140550_EPM_BWPOF2_2358_M
+
+Loading data for 20130420_170945_EPM_BWPOF2_2512_F
+Exception: No analysis directory found for: 20130420_170945_EPM_BWPOF2_2512_F
+
+Loading data for 20130421_164731_EPM_BWPOF2_2517_F
+Exception: No miceols.tar inside conditions directory for: 20130421_164731_EPM_BWPOF2_2517_F
+
+Loading data for 20130426_170828_EPM_BWPOF2_2524_M
+Exception: No miceols.tar inside conditions directory for: 20130426_170828_EPM_BWPOF2_2524_M
+
+Loading data for 20130426_173154_EPM_BWPOF2_2541_M
+Exception: No miceols.tar inside conditions directory for: 20130426_173154_EPM_BWPOF2_2541_M
+
+Loading data for 20130426_182050_EPM_BWPOF2_2528_F
+Exception: No analysis directory found for: 20130426_182050_EPM_BWPOF2_2528_F
+
+Loading data for 20130503_162046_EPM_BWPOF2_2607_F
+Exception: No .zones.dict inside conditions directory for: 20130503_162046_EPM_BWPOF2_2607_F
+
+Loading data for 20130515_110121_EPM_BWPOF2_2677_M
+Exception: No analysis directory found for: 20130515_110121_EPM_BWPOF2_2677_M
+
+Loading data for 20130528_145331_EPM_BWPOF2_2730_M
+Exception: No analysis directory found for: 20130528_145331_EPM_BWPOF2_2730_M
+
+Loading data for 20130611_133434_EPM_BWPOF2_2923_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130612_131848_EPM_BWPOF2_2926_M
+Exception: No analysis directory found for: 20130612_131848_EPM_BWPOF2_2926_M
+
+Loading data for 20130624_183435_EPM_BWPOF2_3023_M
+Exception: No analysis directory found for: 20130624_183435_EPM_BWPOF2_3023_M
+
+Loading data for 20130625_174252_EPM_BWPOF2_3035_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130630_173642_EPM_BWPOF2_3082_F
+Exception: No .zones.dict inside conditions directory for: 20130630_173642_EPM_BWPOF2_3082_F
+
+Loading data for 20130716_151144_EPM_BWPOF2_3118_F
+Exception: No analysis directory found for: 20130716_151144_EPM_BWPOF2_3118_F
+
+Loading data for 20130716_173639_EPM_BWPOF2_3124_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130721_141948_EPM_BWPOF2_3157_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130723_163813_EPM_BWPOF2_3186_M
+Calculating residency in arms
+0 100 200 300 400 500 600 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130730_140800_EPM_BWPOF2_3243_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130806_132751_EPM_BWPOF2_3302_M
+Exception: No analysis directory found for: 20130806_132751_EPM_BWPOF2_3302_M
+
+Loading data for 20130815_130912_EPM_BWPOF2_3331_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20130817_171118_EPM_BWPOF2_3372_M
+Exception: No analysis directory found for: 20130817_171118_EPM_BWPOF2_3372_M
+
+Loading data for 20130826_184443_EPM_BWPOF2_3451_F
+Exception: No miceols.tar inside conditions directory for: 20130826_184443_EPM_BWPOF2_3451_F
+
+Loading data for 20130907_163114_EPM_BWPOF2_3536_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20131003_123827_EPM_BWPOF2_3720_M
+Exception: No analysis directory found for: 20131003_123827_EPM_BWPOF2_3720_M
+
+Loading data for 20131004_122351_EPM_BWPOF2_3740_M
+Calculating residency in arms
+0 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20131004_135444_EPM_BWPOF2_3759_F
+Exception: No analysis directory found for: 20131004_135444_EPM_BWPOF2_3759_F
+
+Loading data for 20131008_113203_EPM_BWPOF2_3825_F
+Exception: No miceols.tar inside conditions directory for: 20131008_113203_EPM_BWPOF2_3825_F
+
+Loading data for 20131010_104714_EPM_BWPOF2_3839_M
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20131029_111237_EPM_BWPOF2_4080_F
+Exception: No miceols.tar inside conditions directory for: 20131029_111237_EPM_BWPOF2_4080_F
+
+Loading data for 20131105_122652_EPM_BWPOF2_4087_F
+Exception: No analysis directory found for: 20131105_122652_EPM_BWPOF2_4087_F
+
+Loading data for 20131106_095615_EPM_BWPOF2_4104_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20131107_120737_EPM_BWPOF2_4132_F
+Calculating residency in arms
+0 100 200 300 400 500 600 700 800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000 3100 3200 3300 3400 3500 3600 3700 3800 3900 4000 4100 4200 4300 4400 4500 4600 4700 4800 4900 5000 5100 5200 5300 5400 5500 5600 5700 5800 5900 6000 6100 6200 6300 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 7600 7700 7800 7900 8000 8100 8200 8300 8400 8500 8600 8700 8800 8900 Calculating distance travelled
+Calculating speed
+Results found
+
+Loading data for 20131115_141712_EPM_BWPOF2_4241_M
+Exception: No .zones.dict inside conditions directory for: 20131115_141712_EPM_BWPOF2_4241_M
