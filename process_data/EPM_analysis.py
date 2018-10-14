@@ -288,3 +288,37 @@ def saveResults(conditions_folder, results_array, frac_in_arms, arm_entries, tot
     # open(conditions_folder+'/smoothedDistance.dict', 'w').write(smoothed_distance.__repr__())
     # open(conditions_folder+'/medianSpeed.dict', 'w').write(median_speed.__repr__())
     # open(conditions_folder+'/smoothedMedianSpeed.dict', 'w').write(smoothed_median_speed.__repr__())
+
+
+def calculateTurningPreference(arm_entries):
+    num_left = 0
+    num_right = 0
+    num_straight = 0
+    num_back = 0
+
+    entries = sorted([entry for zones in arm_entries for entry in zones])
+    arm_entries_tuple = [(entry, zone) for zone, subentries in enumerate(arm_entries) for entry in subentries]
+    entries_dict = dict(arm_entries_tuple)
+
+    turn_left = [(4, 8), (8, 7), (7, 6), (6, 4)]
+    turn_right = [(8, 4), (7, 8), (6, 7), (4, 6)]
+    go_straight = [(4, 7), (7, 4), (6, 8), (8, 6)]
+    go_back = [(4, 4), (6, 6), (7, 7), (8, 8)]
+
+    for i in range(len(entries) - 1):
+        if (entries_dict[entries[i]], entries_dict[entries[i + 1]]) in turn_left:
+            num_left += 1
+        elif (entries_dict[entries[i]], entries_dict[entries[i + 1]]) in turn_right:
+            num_right += 1
+        elif (entries_dict[entries[i]], entries_dict[entries[i + 1]]) in go_straight:
+            num_straight += 1
+        elif (entries_dict[entries[i]], entries_dict[entries[i + 1]]) in go_back:
+            num_back += 1
+
+    return {
+        'num_left': num_left,
+        'num_right': num_right,
+        'num_straight': num_straight,
+        'num_back': num_back,
+
+    }

@@ -66,8 +66,11 @@ def process_directory(parentDirectory, mouseDirectory):
     median_speed = {k: np.median(v) * fps for k, v in distance.items()}
     smoothed_median_speed = {k: np.median(v) * fps for k, v in smoothed_distance.items()}
     print >> sys.stdout, 'Results found'
+    turningPreferences = calculateTurningPreference(arm_entries)
+    mouseData = getMouseData(mouseDirectory)
     results = {
-        'outer_directory': mouseDirectory,
+        'turning_preferences': turningPreferences,
+        'mouse_details': mouseData,
         'inner_directory': innerDirectory,
         'frac_in_arms': frac_in_arms,
         'arm_entries': arm_entries,
@@ -89,7 +92,7 @@ def getMouseDirectories():
     return parentDirectory, mouseDirectories
 
 
-def unnestDict(dictionary):
+def flattenDict(dictionary):
     result = {}
     for key in dictionary.keys():
         if key != 'arm_entries':
@@ -111,13 +114,33 @@ def main():
         #     break
         try:
             mouseResults = process_directory(parentDirectory, mouseDirectory)
-            flatResults = unnestDict(mouseResults)
+            flatResults = flattenDict(mouseResults)
             aggregateResults.append(flatResults)
         except NoDataError, e:
             print('Exception: {}'.format(e))
-    # with open('aggregate_results.json', 'w') as fp:
-    #     #     json.dump(aggregateResults, fp)
-    pd.DataFrame(aggregateResults).to_csv('aggregate_results_new.csv')
+    saveResultsAsJson(aggregateResults)
+    saveResultsAsCSV(aggregateResults)
+
+
+def saveResultsAsCSV(aggregateResults):
+    pd.DataFrame(aggregateResults).to_csv('aggregate_results.csv')
+
+
+def saveResultsAsJson(aggregateResults):
+    with open('aggregate_results.json', 'w') as fp:
+        json.dump(aggregateResults, fp)
+
+
+def getMouseData(outer_directory):
+    mouse_char = outer_directory.split('/')[0].split('_')
+    return {
+        'date': mouse_char[0],
+        'time': mouse_char[1],
+        'EPM': mouse_char[2],
+        'strain': mouse_char[3],
+        'mouseID': mouse_char[4],
+        'sex': mouse_char[5] if len(mouse_char) > 5 else ''
+    }
 
 
 main()
