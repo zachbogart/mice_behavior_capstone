@@ -144,7 +144,7 @@ def main():
             mouseResults = process_directory(parentDirectory, mouseDirectory)
             flatResults = flattenDict(mouseResults)
             aggregateResults.append(flatResults)
-        except NoDataError, e:
+        except (NoDataError, IndexError), e: # TODO Index Error fix?
             print('Exception: {}'.format(e))
     saveResultsAsJson(aggregateResults)
     saveResultsAsCSV(aggregateResults)
