@@ -1,3 +1,5 @@
+import csv
+
 from EPM_analysis import *
 
 import sys
@@ -10,7 +12,25 @@ class NoDataError(Exception):
     pass
 
 
+directoriesToUse = set()
+
+
+def populateDirectoriesToUse():
+    with open('results_files.txt') as csvfile:
+        global directoriesToUse
+        spamReader = csv.reader(csvfile, delimiter=',')
+        for row in spamReader:
+            for item in row:
+                cleanPath = item.replace("'", "").strip()
+                lastSlash = cleanPath.rfind("/")
+                secondLastSlash = cleanPath[:lastSlash].rfind("/")
+                actualDirectory = cleanPath[secondLastSlash + 1:lastSlash]
+                directoriesToUse.add(actualDirectory)
+
+
 def process_directory(parentDirectory, mouseDirectory):
+    populateDirectoriesToUse()
+
     print('')
     print('Loading data for {}'.format(mouseDirectory))
 
@@ -21,13 +41,17 @@ def process_directory(parentDirectory, mouseDirectory):
     if os.path.isdir(analysisDirectory):
         innerDirectories = os.listdir(analysisDirectory)
         if innerDirectories:
-            innerDirectory = innerDirectories[0]  # TODO: How do we know which one to use?
-            if os.path.isdir(os.path.join(analysisDirectory, innerDirectory)):
-                conditions_folder_path = os.path.join(analysisDirectory, innerDirectory)
-                if not os.path.isfile(os.path.join(conditions_folder_path, 'miceols.tar')):
-                    raise NoDataError('No miceols.tar inside conditions directory for: {}'.format(mouseDirectory))
-            else:
-                raise NoDataError('No directories found inside analysis directory for: {}'.format(mouseDirectory))
+            directoryFound = False
+            for innerDirectory in innerDirectories:
+                if os.path.isdir(os.path.join(analysisDirectory, innerDirectory)):
+                    if innerDirectory in directoriesToUse:
+                        conditions_folder_path = os.path.join(analysisDirectory, innerDirectory)
+                        if not os.path.isfile(os.path.join(conditions_folder_path, 'miceols.tar')):
+                            raise NoDataError('No miceols.tar inside conditions directory for: {}'.format(mouseDirectory))
+                        else:
+                            directoryFound = True
+            if not directoryFound:
+                raise NoDataError('No inner folders found for: {}'.format(mouseDirectory))
         else:
             raise NoDataError('No directories found inside analysis directory for: {}'.format(mouseDirectory))
     else:
@@ -109,9 +133,9 @@ def main():
     i = 0
     aggregateResults = []
     for mouseDirectory in mouseDirectories:
-        # i += 1
-        # if i >= 15:
-        #     break
+        i += 1
+        if i >= 15:
+            break
         try:
             mouseResults = process_directory(parentDirectory, mouseDirectory)
             flatResults = flattenDict(mouseResults)
