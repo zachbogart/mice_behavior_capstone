@@ -6,6 +6,7 @@ import sys
 import os
 import json
 import pandas as pd
+from datetime import datetime
 
 
 class NoDataError(Exception):
@@ -50,6 +51,8 @@ def process_directory(parentDirectory, mouseDirectory):
                             raise NoDataError('No miceols.tar inside conditions directory for: {}'.format(mouseDirectory))
                         else:
                             directoryFound = True
+                    # else:
+                    #     raise NoDataError('Directory not in results_files.txt: {}'.format(mouseDirectory))
             if not directoryFound:
                 raise NoDataError('No inner folders found for: {}'.format(mouseDirectory))
         else:
@@ -110,7 +113,7 @@ def process_directory(parentDirectory, mouseDirectory):
 
 def getMouseDirectories():
     currentDirectory = os.getcwd()
-    parentDirectory = os.path.join(currentDirectory, "Mice_Capstone_data_files")
+    parentDirectory = os.path.join(currentDirectory, "EPM_data")
     mouseDirectories = os.listdir(parentDirectory)
     mouseDirectories.sort()
     return parentDirectory, mouseDirectories
@@ -129,13 +132,14 @@ def flattenDict(dictionary):
 
 
 def main():
+    startTime = datetime.now()
     parentDirectory, mouseDirectories = getMouseDirectories()
     i = 0
     aggregateResults = []
     for mouseDirectory in mouseDirectories:
-        i += 1
-        if i >= 15:
-            break
+        # i += 1
+        # if i >= 15:
+        #     break
         try:
             mouseResults = process_directory(parentDirectory, mouseDirectory)
             flatResults = flattenDict(mouseResults)
@@ -144,14 +148,15 @@ def main():
             print('Exception: {}'.format(e))
     saveResultsAsJson(aggregateResults)
     saveResultsAsCSV(aggregateResults)
+    print("Time to execute: {}".format(datetime.now() - startTime))
 
 
 def saveResultsAsCSV(aggregateResults):
-    pd.DataFrame(aggregateResults).to_csv('aggregate_results.csv')
+    pd.DataFrame(aggregateResults).to_csv('all_the_data1.csv')
 
 
 def saveResultsAsJson(aggregateResults):
-    with open('aggregate_results.json', 'w') as fp:
+    with open('all_the_data1.json', 'w') as fp:
         json.dump(aggregateResults, fp)
 
 
