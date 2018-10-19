@@ -1,0 +1,120 @@
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(grid)
+library(gridExtra)
+```
+
+```{r}
+setwd('/Users/cynthiaclement/mice_behavior_capstone/analysis')
+df <- read.csv('cleaned_eda_data.csv')
+df$count  = 1 
+
+df <- df %>% filter(mouse_details_sex %in% c('F', 'M')) %>%
+             mutate(gender = if_else(mouse_details_sex == 'F', 'Female', 'Male'))
+df$mouse_details_strain <- factor(df$mouse_details_strain, levels = c('BW', 'PO', 'BWPOF1', 'BWPOF2'))
+```
+
+
+
+```{r}
+
+strain <- df %>% group_by(mouse_details_strain) %>% summarize(count = sum(count))
+strain$mouse_details_strain <- factor(strain$mouse_details_strain, levels = c('BW', 'PO', 'BWPOF1', 'BWPOF2'))
+
+ggplot(strain, aes(x = mouse_details_strain, y = count)) + 
+        geom_bar(stat = 'identity', fill="steelblue") +
+        theme_minimal() + 
+        ggtitle("Distrubution of Mice by Strain") +
+        xlab("Strain") + 
+        ylab("Count") +
+        theme(plot.title = element_text(hjust = 0.5))
+        
+
+```
+
+
+```{r}
+gender <- df %>% group_by(mouse_details_sex) %>% 
+                 summarize(count = sum(count)) %>% 
+                 mutate(gender = if_else(mouse_details_sex == 'F', 'Female', 'Male'))
+
+ggplot(gender, aes(x = gender, y = count)) + 
+        geom_bar(stat = 'identity', fill="steelblue") +
+        theme_minimal() + 
+        ggtitle("Distrubution of Mice by Gender") +
+        xlab("Gender") + 
+        ylab("Count") +
+        theme(plot.title = element_text(hjust = 0.5))
+        
+
+```
+
+
+```{r}
+gender_st <- df %>% group_by(mouse_details_sex, mouse_details_strain) %>% 
+                 summarize(count = sum(count)) %>% 
+                 mutate(gender = if_else(mouse_details_sex == 'F', 'Female', 'Male'))
+
+ggplot(gender_st, aes(x = mouse_details_strain, y = count, fill = gender)) + 
+        geom_bar(stat = 'identity', position=position_dodge()) +
+        theme_minimal() + 
+        ggtitle("Distrubution of Mice by Gender and Strain") +
+        xlab("Gender") + 
+        ylab("Count") +
+        theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+```{r}
+dodge <- position_dodge(width = .9)
+ggplot(df, aes(mouse_details_strain, frac_in_arms_frac_in_closedAndMiddle, fill = gender)) + 
+        geom_violin() + 
+        geom_jitter(alpha = .3) +
+        geom_boxplot(width=0.1,  outlier.colour=NA, position = dodge) +
+        theme_minimal() + 
+        ggtitle("Time Spent in Closed and Middle Arms by Strain") +
+        xlab("Strain") + 
+        ylab("Fraction of Time in Closed and Middle Arms") +
+        theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+```{r}
+df2 <- df %>% filter(mouse_details_strain %in% c('BW', 'PO'))
+
+dodge <- position_dodge(width = .9)
+ggplot(df2, aes(mouse_details_strain,frac_in_arms_frac_in_closedAndMiddle, color = gender)) + 
+        geom_violin() + 
+        geom_point(alpha = .3, position = position_jitterdodge(), width  = .1 ) +
+        geom_boxplot(width=0.1,  outlier.colour=NA, position = dodge) +
+        theme_minimal() + 
+        ggtitle("Time Spent in Closed and Middle Arms by Strain") +
+        xlab("Strain") + 
+        ylab("Fraction of Time in Closed and Middle Arms") +
+        theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+
+
+
+
+
+```{r}
+ggplot(df2, aes(mouse_details_strain,frac_in_arms_frac_in_openArms, color = gender)) + 
+        geom_violin() + 
+        geom_point(alpha = .3, position = position_jitterdodge(), width  = .1 ) +
+        geom_boxplot(width=0.1,  outlier.colour=NA, position = dodge) +
+        theme_minimal() + 
+        ggtitle("Time Spent in Open Arms by Strain") +
+        xlab("Strain") + 
+        ylab("Fraction of Time in Open Arms") +
+        theme(plot.title = element_text(hjust = 0.5))
+
+```
+
