@@ -1,16 +1,37 @@
+import csv
+
 from EPM_analysis import *
 
 import sys
 import os
 import json
 import pandas as pd
+from datetime import datetime
 
 
 class NoDataError(Exception):
     pass
 
 
+directoriesToUse = set()
+
+
+def populateDirectoriesToUse():
+    with open('results_files.txt') as csvfile:
+        global directoriesToUse
+        spamReader = csv.reader(csvfile, delimiter=',')
+        for row in spamReader:
+            for item in row:
+                cleanPath = item.replace("'", "").strip()
+                lastSlash = cleanPath.rfind("/")
+                secondLastSlash = cleanPath[:lastSlash].rfind("/")
+                actualDirectory = cleanPath[secondLastSlash + 1:lastSlash]
+                directoriesToUse.add(actualDirectory)
+
+
 def process_directory(parentDirectory, mouseDirectory):
+    populateDirectoriesToUse()
+
     print('')
     print('Loading data for {}'.format(mouseDirectory))
 
@@ -21,13 +42,19 @@ def process_directory(parentDirectory, mouseDirectory):
     if os.path.isdir(analysisDirectory):
         innerDirectories = os.listdir(analysisDirectory)
         if innerDirectories:
-            innerDirectory = innerDirectories[0]  # TODO: How do we know which one to use?
-            if os.path.isdir(os.path.join(analysisDirectory, innerDirectory)):
-                conditions_folder_path = os.path.join(analysisDirectory, innerDirectory)
-                if not os.path.isfile(os.path.join(conditions_folder_path, 'miceols.tar')):
-                    raise NoDataError('No miceols.tar inside conditions directory for: {}'.format(mouseDirectory))
-            else:
-                raise NoDataError('No directories found inside analysis directory for: {}'.format(mouseDirectory))
+            directoryFound = False
+            for innerDirectory in innerDirectories:
+                if os.path.isdir(os.path.join(analysisDirectory, innerDirectory)):
+                    if innerDirectory in directoriesToUse:
+                        conditions_folder_path = os.path.join(analysisDirectory, innerDirectory)
+                        if not os.path.isfile(os.path.join(conditions_folder_path, 'miceols.tar')):
+                            raise NoDataError('No miceols.tar inside conditions directory for: {}'.format(mouseDirectory))
+                        else:
+                            directoryFound = True
+                    # else:
+                    #     raise NoDataError('Directory not in results_files.txt: {}'.format(mouseDirectory))
+            if not directoryFound:
+                raise NoDataError('No inner folders found for: {}'.format(mouseDirectory))
         else:
             raise NoDataError('No directories found inside analysis directory for: {}'.format(mouseDirectory))
     else:
@@ -86,7 +113,7 @@ def process_directory(parentDirectory, mouseDirectory):
 
 def getMouseDirectories():
     currentDirectory = os.getcwd()
-    parentDirectory = os.path.join(currentDirectory, "Mice_Capstone_data_files")
+    parentDirectory = os.path.join(currentDirectory, "EPM_data")
     mouseDirectories = os.listdir(parentDirectory)
     mouseDirectories.sort()
     return parentDirectory, mouseDirectories
@@ -105,6 +132,7 @@ def flattenDict(dictionary):
 
 
 def main():
+    startTime = datetime.now()
     parentDirectory, mouseDirectories = getMouseDirectories()
     i = 0
     aggregateResults = []
@@ -116,18 +144,19 @@ def main():
             mouseResults = process_directory(parentDirectory, mouseDirectory)
             flatResults = flattenDict(mouseResults)
             aggregateResults.append(flatResults)
-        except NoDataError, e:
+        except (NoDataError, IndexError), e: # TODO Index Error fix?
             print('Exception: {}'.format(e))
     saveResultsAsJson(aggregateResults)
     saveResultsAsCSV(aggregateResults)
+    print("Time to execute: {}".format(datetime.now() - startTime))
 
 
 def saveResultsAsCSV(aggregateResults):
-    pd.DataFrame(aggregateResults).to_csv('aggregate_results.csv')
+    pd.DataFrame(aggregateResults).to_csv('all_the_data1.csv')
 
 
 def saveResultsAsJson(aggregateResults):
-    with open('aggregate_results.json', 'w') as fp:
+    with open('all_the_data1.json', 'w') as fp:
         json.dump(aggregateResults, fp)
 
 

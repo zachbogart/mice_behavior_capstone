@@ -1,0 +1,57 @@
+---
+title: "explore_r"
+author: "Zach"
+date: "10/17/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Parse Data
+
+BW = Peromyscus maniculatus (deer mice): hide more
+PO = Peromyscus polionotus (oldfield mice): explore more
+
+```{r}
+library(tidyverse)
+library(skimr)
+```
+
+```{r}
+mice <- read_csv("../process_data/aggregate_results_new.csv")
+
+foo <- mice %>%
+  separate(outer_directory, into = c("date", "time", "epm", "strain", "mouse_id", "sex"), sep ="_") %>%
+  select(-epm, -X1) %>%
+  mutate(strain = as.factor(strain))
+```
+
+```{r}
+skim(foo)
+```
+
+
+```{r}
+ggplot(foo, aes(x = frac_in_arms_frac_in_closedAndMiddle, y = frac_in_arms_frac_in_openArms, col = strain)) +
+  geom_point(alpha = 0.7)
+```
+
+Looks like some of the mice trials, a lot the time is not spent in the maze.
+
+```{r}
+foo_abnormal <- foo %>%
+  mutate(total_percentage = frac_in_arms_frac_in_closedAndMiddle + frac_in_arms_frac_in_openArms) %>%
+  mutate(not_enough = total_percentage < 0.9)
+
+ggplot(foo_abnormal, aes(x = frac_in_arms_frac_in_closedAndMiddle, y = frac_in_arms_frac_in_openArms, col = not_enough)) +
+  geom_point(alpha = 0.7) + xlim(0, 1) + ylim(0, 1) +
+  geom_abline(intercept = 1, slope = -1)
+  
+```
+
+
+
+
+
