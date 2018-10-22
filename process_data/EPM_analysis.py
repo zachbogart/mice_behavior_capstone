@@ -7,6 +7,7 @@
 # 0.0.3 2016-01-11
 # Fixed path issues in load_data and chnaged opening to 'with open'
 # Fixed problems with calcPosition
+from collections import defaultdict
 
 import Util, tarfile, os, sys
 import numpy as np
@@ -17,13 +18,13 @@ import pandas as pd
 
 
 def load_data(conditions_folder_path, start_frame=None, end_frame=None, ext='.zones.dict'):
-    '''
+    """
     INPUT: This function takes a conditions_folder (string), e.g. '20130202_163641_EPM_BWPOF2_1403_F/analysis/900-7725_man-thresh-0.250',
     and an extension for the zones dictionary (string), which by default is '.zones.dict'
-    OUTPUT: Returns miceols_list, a comprehensive list of mice outlines coordinates, frame by frame; 
+    OUTPUT: Returns miceols_list, a comprehensive list of mice outlines coordinates, frame by frame;
     zones_masks, a dictionary with EPM zones masks; and
-    shape, the shape of the video. 
-    '''
+    shape, the shape of the video.
+    """
 
     an_dir = conditions_folder_path
 
@@ -94,9 +95,10 @@ def arm_entry(results_array, zones_order):
     for frame in range(len(results_array) - 1):
         # Compare each arm, one by one to the middle 
         for zone in [4, 6, 7, 8]:  # 4,6,7,8 are the arms
-            if results_array[
-                frame, 5] > 0:  # 5 is the middle area. Arm antries can only occur if a mouse was present in the middle.
-                # Arm entry: If in a given frame there is less of a mouse in an arm than in the middle and in the next frame most of the mouse is in an arm
+            if results_array[frame, 5] > 0:
+                # 5 is the middle area. Arm antries can only occur if a mouse was present in the middle.
+                # Arm entry: If in a given frame there is less of a mouse in an arm than in the middle and in the next
+                # frame most of the mouse is in an arm
                 if results_array[frame, zone] <= results_array[frame, 5] and np.argmax(
                         results_array[frame + 1]) == zone:
                     arm_entries[zone].append(frame + 1)
@@ -115,8 +117,8 @@ def time_in_arms(results_array, zones_order):
     return dict(zip(arms, arm_residence))
 
 
-def fill_in_missing_outlines(
-        mice_ols):  # fills in position of mouse that disappeared due to immobility based on where he was before he disapeared
+def fill_in_missing_outlines(mice_ols):
+    # fills in position of mouse that disappeared due to immobility based on where he was before he disapeared
     # Run this loop twice. On the first run, fill empty frames with the outline in the preceding frame.
     # Since that doesn't fill missing outlines at the beginning of the tracked video, reverse mice_ols and do again,
     # this time filling missing outlines with the outline in the following frame.
@@ -130,28 +132,12 @@ def fill_in_missing_outlines(
     return filled_in_mice_ols
 
 
-def calcPosition(shape, filled_in_mice_ols, zones_order, results_array):
+def calcPosition(centroids, zones_order, results_array):
     '''
     Finds the position of the largest outline in each frame
     '''
-    # Find centroids of filled_in_mice_ols
-    centroids = []
-    cm = vidtools.calc_coordMat(shape)
-    for fr in filled_in_mice_ols:
-        # If there are more than one outlines in a frame, chose the largest outline
-        if len(fr) > 1:
-            ol_size = [vidtools.size_of_polygon(ol) for ol in fr]
-            largest_ol = fr[np.argmax(ol_size)]
-            ol = largest_ol
-        else:
-            ol = fr[0]
-        centroids.append(vidtools.centroid(ol, shape, cm))
-
     # Split centroids into arcs of consecutive presence in an arm
     # Make dictionary that will hold the position of the mice
-
-    # centroidDF = pd.DataFrame(centroids)
-    # centroidDF.to_csv('centroids.csv')
 
     arcs_in_arms = {}
     for z in zones_order:
@@ -167,6 +153,25 @@ def calcPosition(shape, filled_in_mice_ols, zones_order, results_array):
             arcs_in_arms[arm_thisFrame][-1].append(position)
         arm_lastFrame = arm_thisFrame
     return arcs_in_arms
+
+
+def calculateCentroids(filled_in_mice_ols, shape):
+    # Find centroids of filled_in_mice_ols
+    centroids = []
+    cm = vidtools.calc_coordMat(shape)
+    for fr in filled_in_mice_ols:
+        # If there are more than one outlines in a frame, chose the largest outline
+        if len(fr) > 1:
+            ol_size = [vidtools.size_of_polygon(ol) for ol in fr]
+            largest_ol = fr[np.argmax(ol_size)]
+            ol = largest_ol
+        else:
+            ol = fr[0]
+        centroids.append(vidtools.centroid(ol, shape, cm))
+
+    centroidDF = pd.DataFrame(centroids)
+    centroidDF.to_csv('centroids.csv')
+    return centroids
 
 
 def calcDistance(arcs_in_arms):
@@ -208,7 +213,7 @@ def smooth(x, window_len=10, window='flat'):
         # raise ValueError, "Input vector needs to be bigger than window size."
     if window_len < 3:
         return x
-    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+    if window not in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
         raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
     s = np.r_[x[window_len - 1:0:-1], x, x[-1:-window_len:-1]]
     # print(len(s))
@@ -236,28 +241,28 @@ def calculateResults(zones_order, results_array, start_frame, end_frame, conditi
     frames_in_arms = time_in_arms(results_array, zones_order)
 
     # Plot arm residence time and arm entries
-    figure(1, figsize=(12, 8))
-    plot(results_array[:, 4:9])
-    if arm_entries[4]:
-        scatter(arm_entries[4], 200 * ones(len(arm_entries[4])), c='b', s=40)
-    if arm_entries[6]:
-        scatter(arm_entries[6], 200 * ones(len(arm_entries[6])), c='r', s=40)
-    if arm_entries[7]:
-        scatter(arm_entries[7], 200 * ones(len(arm_entries[7])), c='c', s=40)
-    if arm_entries[8]:
-        scatter(arm_entries[8], 200 * ones(len(arm_entries[8])), c='m', s=40)
-    legend(zones_order[4:9])
-    title(conditions_folder, size=10)
-    xlim(0, results_array.shape[0])
-    ylim(0, np.max(results_array) * 1.05)
-    # Set ticks every minute (1800 frames is 1 minute at 30 fps)
-    xticks(range(1800, results_array.shape[0], 1800),
-           [str(y) for y in range(1, int(floor(results_array.shape[0] / float(30 * 60))) + 1)])
-    xlabel('minutes')
-    ylabel('number of mouse pixels')
+    # figure(1, figsize=(12, 8))
+    # plot(results_array[:, 4:9])
+    # if arm_entries[4]:
+    #     scatter(arm_entries[4], 200 * ones(len(arm_entries[4])), c='b', s=40)
+    # if arm_entries[6]:
+    #     scatter(arm_entries[6], 200 * ones(len(arm_entries[6])), c='r', s=40)
+    # if arm_entries[7]:
+    #     scatter(arm_entries[7], 200 * ones(len(arm_entries[7])), c='c', s=40)
+    # if arm_entries[8]:
+    #     scatter(arm_entries[8], 200 * ones(len(arm_entries[8])), c='m', s=40)
+    # legend(zones_order[4:9])
+    # title(conditions_folder, size=10)
+    # xlim(0, results_array.shape[0])
+    # ylim(0, np.max(results_array) * 1.05)
+    # # Set ticks every minute (1800 frames is 1 minute at 30 fps)
+    # xticks(range(1800, results_array.shape[0], 1800),
+    #        [str(y) for y in range(1, int(floor(results_array.shape[0] / float(30 * 60))) + 1)])
+    # xlabel('minutes')
+    # ylabel('number of mouse pixels')
     # savefig
     # savefig(conditions_folder + '/arm_residence_entries.pdf') # TODO: Why are we saving this?
-    close(1)
+    # close(1)
 
     return frac_in_arms, tot_arm_entries, frames_in_arms, arm_entries  # ,xplor_frac
 
@@ -315,10 +320,120 @@ def calculateTurningPreference(arm_entries):
         elif (entries_dict[entries[i]], entries_dict[entries[i + 1]]) in go_back:
             num_back += 1
 
+    num_turns_total = num_right + num_back + num_left + num_straight
     return {
         'num_left': num_left,
         'num_right': num_right,
         'num_straight': num_straight,
         'num_back': num_back,
+        'percent_right_turns': num_right / num_turns_total,
+        'percent_left_turns': num_left / num_turns_total,
+        'percent_straight_turns': num_straight / num_turns_total,
+        'percent_back_turns': num_back / num_turns_total,
+        'right_over_right_and_left': num_right / (num_right + num_left),
+        'left_over_right_and_left': num_left / (num_right + num_left),
+        'num_turns_total': num_turns_total
+    }
 
+
+def calculatePeekingTimes(arm_entries, threshold=150):
+    # if a mouse leaves an arm then goes back without entering any other arm in
+    # a threshold of frames(e.g., threshold = 150(5 seconds))
+    # then count it as one time of peeking
+    times = dict()
+    arms = [4, 6, 7, 8]
+    for arm in arms:
+        times[arm] = 0
+
+    entries = sorted([entry for zones in arm_entries for entry in zones])
+    arm_entries_tuple = [(entry, zone) for zone, subentries in enumerate(arm_entries) for entry in subentries]
+    entries_dict = dict(arm_entries_tuple)
+
+    for k in range(len(entries) - 1):
+        if entries[k + 1] - entries[k] < threshold and entries_dict[entries[k]] == entries_dict[entries[k + 1]]:
+            times[entries_dict[entries[k]]] += 1
+
+    return times
+
+
+def RegionToRegionFreq(arm_entries):
+    # get the freq of a mouse move from one region to another.
+    freq = defaultdict(int)
+    entries = sorted([entry for zones in arm_entries for entry in zones])
+    arm_entries_tuple = [(entry, zone) for zone, subentries in enumerate(arm_entries) for entry in subentries]
+    entries_dict = dict(arm_entries_tuple)
+
+    arms = [4, 6, 7, 8]
+    for i in range(len(arms) - 1):
+        for j in range(i, len(arms)):
+            for k in range(len(entries) - 1):
+                if entries_dict[entries[k]] == arms[i] and entries_dict[entries[k + 1]] == arms[j]:
+                    freq[(arms[i], arms[j])] += 1
+
+    return dict(freq)
+
+
+def makeHistogram(dataList, title='Hist'):
+    fig = plt.figure(figsize=(40, 20))
+
+    percentile50 = np.percentile(dataList, 50)
+    percentile75 = np.percentile(dataList, 75)
+    percentile90 = np.percentile(dataList, 90)
+
+    plt.hist(dataList, bins='auto')  # arguments are passed to np.histogram
+    plt.axvline(x=percentile50, color='k', linestyle='dashed', linewidth=1)
+    plt.axvline(x=percentile75, color='k', linestyle='dashed', linewidth=1)
+    plt.axvline(x=percentile90, color='k', linestyle='dashed', linewidth=1)
+    plt.title(title)
+    plt.xlabel("Value")
+    plt.ylabel("Frequency")
+    plt.show()
+    fig.savefig(title + '.png')
+    # with open('mouseSizes.csv', 'wb') as myfile:
+    #     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+    #     wr.writerow(mouseSizeOverTime)
+
+
+def calculateMouseSize(filled_in_mice_ols):
+    mouseSizeOverTime = []
+    mouseWidthOverTime = []
+    mouseHeightOverTime = []
+    for boundaryBox in filled_in_mice_ols:
+        xMin = 1000
+        xMax = -1
+        yMin = 1000
+        yMax = -1
+        for point in boundaryBox[0]:
+            x = point[0]
+            y = point[1]
+            if x < xMin:
+                xMin = x
+            elif x > xMax:
+                xMax = x
+            if y < yMin:
+                yMin = y
+            elif y > yMax:
+                yMax = y
+        mouseWidth = xMax - xMin
+        mouseHeight = yMax - yMin
+        mouseSize = mouseWidth * mouseHeight
+        mouseHeightOverTime.append(mouseHeight)
+        mouseWidthOverTime.append(mouseWidth)
+        mouseSizeOverTime.append(mouseSize)
+
+    makeHistogram(mouseWidthOverTime, 'MouseWidth')
+    makeHistogram(mouseHeightOverTime, 'MouseHeight')
+    makeHistogram(mouseSizeOverTime, 'MouseSize')
+    return np.percentile(mouseSizeOverTime, 90)
+
+
+def getMouseData(outer_directory):
+    mouse_char = outer_directory.split('/')[0].split('_')
+    return {
+        'date': mouse_char[0],
+        'time': mouse_char[1],
+        'EPM': mouse_char[2],
+        'strain': mouse_char[3],
+        'mouseID': mouse_char[4],
+        'sex': mouse_char[5] if len(mouse_char) > 5 else ''
     }
