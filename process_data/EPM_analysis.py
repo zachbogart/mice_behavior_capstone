@@ -16,6 +16,8 @@ import vidtools
 from pylab import *
 import pandas as pd
 
+GOOD_ARMS = {'CR', 'CL', 'OT', 'OB', 'M'}
+
 
 def load_data(conditions_folder_path, start_frame=None, end_frame=None, ext='.zones.dict'):
     """
@@ -56,22 +58,43 @@ def load_data(conditions_folder_path, start_frame=None, end_frame=None, ext='.zo
     return mice_ols[start_frame:end_frame], zones_masks, shape
 
 
-def filter_mice_ols(mice_ols, EPMzones):
-    '''
-    Takes a list of frames with outlines and filters it, returning only the frames in EPMzones
-    '''
+def filterBoundariesByZone(mice_ols, zone_masks):
+    """
+    Takes a list of frames with outlines and filters it, returning only the frames in EPMZones
+    """
 
     def in_EPM(ol):
         '''
-        Takes a frame with outlines and returns the outlines within the EPMzones
+        Takes a frame with outlines and returns the outlines within the EPMZones
         '''
         y, x = zip(*ol)  # y,x because coordinates are reversed in the outlines tuples
-        return (EPMzones[x, y]).any()
+        return (EPMZones[x, y]).any()
 
-    mice_ols_in_EPMzones = []
+    EPMZones = calculateEPMZones(zone_masks)
+    boundariesInEPMZones = []
     for ol in mice_ols:
-        mice_ols_in_EPMzones.append(filter(in_EPM, ol))
-    return mice_ols_in_EPMzones
+        boundariesInEPMZones.append(filter(in_EPM, ol))
+    return boundariesInEPMZones
+
+
+def cleanBoundaries(boundaries, shape, zones_masks):
+    boundariesInEPMZones = filterBoundariesByZone(boundaries, zones_masks)
+    boundariesClean, results_array, zones_order = fillGapsInBoundaries(boundariesInEPMZones, shape, zones_masks)
+    return boundariesClean, results_array, zones_order
+
+
+def fillGapsInBoundaries(boundariesInEPMZones, shape, zones_masks):
+    # Fill in missing outlines twice, once running forwards and once backwards
+    boundariesFilledIn = fill_in_missing_outlines(boundariesInEPMZones)
+    zones_order, results_array = initialize_results_array(zones_masks, boundariesFilledIn)
+    mouse_position_in_zones(boundariesFilledIn, shape, zones_order, zones_masks, results_array)
+    return boundariesFilledIn, results_array, zones_order
+
+
+def calculateEPMZones(zones_masks):
+    # Make a mask of all the EPM zones (those that don't start with 'F', for floor)
+    EPMzones = reduce(lambda x, y: x + y, [zones_masks[k] for k in zones_masks if not k.startswith('F')])
+    return EPMzones
 
 
 def initialize_results_array(zones_masks, mice_ols):
@@ -133,9 +156,11 @@ def fill_in_missing_outlines(mice_ols):
 
 
 def calcPosition(centroids, zones_order, results_array):
-    '''
+    """
     Finds the position of the largest outline in each frame
-    '''
+    """
+
+    # TODO: Right now we ignore arcs that go from one arm to another
     # Split centroids into arcs of consecutive presence in an arm
     # Make dictionary that will hold the position of the mice
 
@@ -174,16 +199,73 @@ def calculateCentroids(filled_in_mice_ols, shape):
     return centroids
 
 
-def calcDistance(arcs_in_arms):
+def calculateVelocityFeatures(distance):
+    # Speed in pixels per second
+    fps = 30.083  # Median frames per seconds of >2000 EPM videos
+    median_speed = {k: np.median(v) * fps for k, v in distance.items()}
+    return median_speed
+
+
+def calculateFractionOfTimeActive(distancesPerArm):
+    timeActiveTotal = 0
+    timeTotal = 0
+    result = {}
+    for arm, distances in distancesPerArm.items():
+        if arm in GOOD_ARMS:
+            timeActiveArm = reduce(lambda count, i: count + isActive(i), distances, 0)
+            timeArm = len(distances)
+            if timeArm:
+                result[arm] = timeActiveArm / float(timeArm)
+                timeActiveTotal += timeActiveArm
+                timeTotal += timeArm
+            else:
+                result[arm] = 0
+
+    result['all_arms'] = timeActiveTotal / float(timeTotal)
+    return result
+
+
+def isActive(speed):
+    # TODO: Figure out what the speed should be to be considered active
+    return speed > 0.5
+
+
+def calculateDistanceFeatures(arcs_in_arms):
+    distancesPerArm, directionsPerArm = calculateDistances(arcs_in_arms)  # In pixels
+    # totalDistancePerArm = calculateTotalDistancePerArm(distancesPerArm)
+    distancesPerArmSmoothed = {k: smooth(np.array(v)) for k, v in distancesPerArm.items()}
+    totalDistancePerArmSmoothed = calculateTotalDistancePerArm(distancesPerArmSmoothed)
+    return distancesPerArmSmoothed, directionsPerArm, totalDistancePerArmSmoothed
+
+
+def calculateTotalDistancePerArm(distancesPerArm):
+    return {k: np.sum(v) for k, v in distancesPerArm.items()}
+
+
+def calculateDistances(arcs_in_arms):
     # Calculate distance frame by frame
-    distance = {k: [] for k in arcs_in_arms.keys()}
+    distancesPerArm = {k: [] for k in arcs_in_arms.keys()}
+    directionsPerArm = {k: [] for k in arcs_in_arms.keys()}
     for arm, arcs in arcs_in_arms.items():
         for arc in arcs:
             for frame in range(len(arc) - 1):
-                distance[arm].append(
-                    np.sqrt(((arc[frame + 1][0] - arc[frame][0]) ** 2) + (arc[frame + 1][1] - arc[frame][1]) ** 2))
-    total_distance = {k: np.sum(v) for k, v in distance.items()}
-    return distance, total_distance
+                point1 = arc[frame]
+                point2 = arc[frame + 1]
+                vectorLength = calculateVectorLength(point1, point2)
+                vectorDirection = calculateVectorDirection(point1, point2, vectorLength)
+
+                distancesPerArm[arm].append(vectorLength)
+                directionsPerArm[arm].append(vectorDirection)
+    return distancesPerArm, directionsPerArm
+
+
+def calculateVectorLength(point1, point2):
+    return np.sqrt(((point2[0] - point1[0]) ** 2) + (point2[1] - point1[1]) ** 2)
+
+
+def calculateVectorDirection(point1, point2, vectorLength):
+    directionVector = (point2[0] - point1[0], point2[1] - point1[1])
+    return directionVector / vectorLength
 
 
 def smooth(x, window_len=10, window='flat'):
@@ -226,7 +308,7 @@ def smooth(x, window_len=10, window='flat'):
     return smoothed
 
 
-def calculateResults(zones_order, results_array, start_frame, end_frame, conditions_folder):
+def calculateArmEntries(zones_order, results_array, start_frame, end_frame, conditions_folder):
     tot = float(sum([a.sum() for a in results_array[start_frame:end_frame].transpose()]))
     # pixels_in_zones can assign 'residence time' to multiple zones if mouse is in multiple zones at a time
     pixels_in_zones = dict(zip(zones_order, [a.sum() / tot for a in results_array[start_frame:end_frame].transpose()]))
@@ -421,13 +503,13 @@ def calculateMouseSize(filled_in_mice_ols):
         mouseWidthOverTime.append(mouseWidth)
         mouseSizeOverTime.append(mouseSize)
 
-    makeHistogram(mouseWidthOverTime, 'MouseWidth')
-    makeHistogram(mouseHeightOverTime, 'MouseHeight')
-    makeHistogram(mouseSizeOverTime, 'MouseSize')
+    # makeHistogram(mouseWidthOverTime, 'MouseWidth')
+    # makeHistogram(mouseHeightOverTime, 'MouseHeight')
+    # makeHistogram(mouseSizeOverTime, 'MouseSize')
     return np.percentile(mouseSizeOverTime, 90)
 
 
-def getMouseData(outer_directory):
+def extractMouseFeatures(outer_directory):
     mouse_char = outer_directory.split('/')[0].split('_')
     return {
         'date': mouse_char[0],

@@ -32,57 +32,42 @@ def process_directory(parentDirectory, mouseDirectory):
     #     return {}
 
     conditions_folder_path, innerDirectory = extractContentDirectory(mouseDirectory, parentDirectory)
+    mouseFeatures = extractMouseFeatures(mouseDirectory)
 
+    print('Finding boundaries over time')
     start_frame, end_frame = getStartEndFrames()
-    boundariesOverTime, zones_masks, shape = load_data(conditions_folder_path, start_frame, end_frame)
+    boundaries, zones_masks, shape = load_data(conditions_folder_path, start_frame, end_frame)
+    boundaries, results_array, zones_order = cleanBoundaries(boundaries, shape, zones_masks)
 
-    print >> sys.stdout, 'Calculating residency in arms'
-    # Make a mask of all the EPM zones (those that don't start with 'F', for floor)
-    EPMzones = reduce(lambda x, y: x + y, [zones_masks[k] for k in zones_masks if not k.startswith('F')])
-
-    # Only include mouse positions when in one of the good zones
-    mice_ols_in_EPMzones = filter_mice_ols(boundariesOverTime, EPMzones)
-
-    # Fill in missing outlines twice, once running forwards and once backwards
-    filled_in_mice_ols = fill_in_missing_outlines(mice_ols_in_EPMzones)
-    zones_order, results_array = initialize_results_array(zones_masks, filled_in_mice_ols)
-    mouse_position_in_zones(filled_in_mice_ols, shape, zones_order, zones_masks, results_array)
-
-    frac_in_arms, tot_arm_entries, frames_in_arms, arm_entries = calculateResults(
-        zones_order,
-        results_array,
-        start_frame,
-        end_frame,
-        conditions_folder_path
+    print('Finding arm entry features')
+    frac_in_arms, tot_arm_entries, frames_in_arms, arm_entries = calculateArmEntries(
+        zones_order, results_array, start_frame, end_frame, conditions_folder_path
     )
-    mouseSize = calculateMouseSize(filled_in_mice_ols)
-    centroids = calculateCentroids(filled_in_mice_ols, shape)
+    centroids = calculateCentroids(boundaries, shape)
     arcs_in_arms = calcPosition(centroids, zones_order, results_array)
-    print >> sys.stdout, 'Calculating distance travelled'
-    distance, total_distance = calcDistance(arcs_in_arms)  # In pixels
-    smoothed_distance = {k: smooth(np.array(v)) for k, v in distance.items()}
-    total_smoothed_distance = {k: np.sum(v) for k, v in smoothed_distance.items()}
-    # Speed in pixels per second
-    print >> sys.stdout, 'Calculating speed'
-    fps = 30.083  # Median frames per seconds of >2000 EPM videos
-    median_speed = {k: np.median(v) * fps for k, v in distance.items()}
-    smoothed_median_speed = {k: np.median(v) * fps for k, v in smoothed_distance.items()}
-    print >> sys.stdout, 'Results found'
     turningPreferences = calculateTurningPreference(arm_entries)
-    mouseData = getMouseData(mouseDirectory)
+
+    print('Finding mouse size')
+    mouseSize = calculateMouseSize(boundaries)
+
+    print('Finding velocity features')
+    distancesPerArm, directionsPerArm, totalDistancePerArm = calculateDistanceFeatures(arcs_in_arms)
+    median_speed = calculateVelocityFeatures(distancesPerArm)
+    activeFractionPerArm = calculateFractionOfTimeActive(distancesPerArm)
+
+    print('Results found for {}'.format(mouseDirectory))
     results = {
         'turning_preferences': turningPreferences,
-        'mouse_details': mouseData,
+        'mouse_details': mouseFeatures,
         'mouse_size': mouseSize,
         'inner_directory': innerDirectory,
         'frac_in_arms': frac_in_arms,
         'arm_entries': arm_entries,
         'tot_arm_entries': tot_arm_entries,
         'frames_in_arms': frames_in_arms,
-        'total_distance': total_distance,
-        'total_smoothed_distance': total_smoothed_distance,
+        'total_distance': totalDistancePerArm,
         'median_speed': median_speed,
-        'smoothed_median_speed': smoothed_median_speed
+        'active_fraction': activeFractionPerArm,
     }
     return results
 
