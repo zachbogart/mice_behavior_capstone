@@ -23,12 +23,22 @@ directoriesToUse = set()
 
 def process_directory(parentDirectory, mouseDirectory):
     populateDirectoriesToUse()
+    setMouseDirectory(mouseDirectory)
 
     print('')
     print('Loading data for {}'.format(mouseDirectory))
 
-    # # TODO: Remove me  --  Use this to stop at only 1 mouse
-    # if mouseDirectory != '20130129_162312_EPM_BW_1368_F':
+    # TODO: Remove me  --  Use this to stop at only 1 mouse
+    # turnOnHistograms()
+    # if mouseDirectory not in [
+    #     '20121130_163816_EPM_BWPOF1_784_M',
+    #     '20121121_151056_EPM_BWPOF2_767_F',
+    #     '20121121_160958_EPM_PO_758_F',
+    #     '20121217_165902_EPM_BWPOF1_823_F',
+    #     '20130129_162312_EPM_BW_1368_F',
+    #     '20130213_165903_EPM_BWPOF2_1464_M',
+    #     '20130123_112930_EPM_BWPOF2_1316_M',
+    # ]:
     #     return {}
 
     conditions_folder_path, innerDirectory = extractContentDirectory(mouseDirectory, parentDirectory)
@@ -44,30 +54,36 @@ def process_directory(parentDirectory, mouseDirectory):
         zones_order, results_array, start_frame, end_frame, conditions_folder_path
     )
     centroids = calculateCentroids(boundaries, shape)
-    arcs_in_arms = calcPosition(centroids, zones_order, results_array)
+    centroidsByArm = calcPosition(centroids, zones_order, results_array)
     turningPreferences = calculateTurningPreference(arm_entries)
 
     print('Finding mouse size')
-    mouseSize = calculateMouseSize(boundaries)
+    mouseLength = calculateMouseSize(boundaries)
 
     print('Finding velocity features')
-    distancesPerArm, directionsPerArm, totalDistancePerArm = calculateDistanceFeatures(arcs_in_arms)
-    median_speed = calculateVelocityFeatures(distancesPerArm)
-    activeFractionPerArm = calculateFractionOfTimeActive(distancesPerArm)
+    distancesPerArm, directionsPerArm, totalDistancePerArm = calculateDistanceFeatures(centroidsByArm)
+    velocity_features = calculateVelocityFeatures(distancesPerArm, directionsPerArm)
+
+    print('Finding miscellaneous features')
+    restFractionPerArm = calculateRest(distancesPerArm)
+    safetyFractionsPerArm = calculateSafety(centroidsByArm, mouseLength)
+    safetyAndRestFractionsPerArm = calculateSafetyAndRest(centroidsByArm, distancesPerArm, mouseLength)
 
     print('Results found for {}'.format(mouseDirectory))
     results = {
         'turning_preferences': turningPreferences,
         'mouse_details': mouseFeatures,
-        'mouse_size': mouseSize,
+        'mouse_length': mouseLength,
         'inner_directory': innerDirectory,
         'frac_in_arms': frac_in_arms,
         'arm_entries': arm_entries,
         'tot_arm_entries': tot_arm_entries,
         'frames_in_arms': frames_in_arms,
         'total_distance': totalDistancePerArm,
-        'median_speed': median_speed,
-        'active_fraction': activeFractionPerArm,
+        'velocity': velocity_features,
+        'active_fraction': restFractionPerArm,
+        'safety_fraction': safetyFractionsPerArm,
+        'safety_and_rest_fraction': safetyAndRestFractionsPerArm,
     }
     return results
 
@@ -129,8 +145,8 @@ def extractContentDirectory(mouseDirectory, parentDirectory):
 
 def getMouseDirectories():
     currentDirectory = os.getcwd()
-    parentDirectory = os.path.join(currentDirectory, "Mice_Capstone_data_files")
-    # parentDirectory = os.path.join(currentDirectory, "EPM_data")
+    # parentDirectory = os.path.join(currentDirectory, "Mice_Capstone_data_files")
+    parentDirectory = os.path.join(currentDirectory, "EPM_data")
     mouseDirectories = os.listdir(parentDirectory)
     mouseDirectories.sort()
     return parentDirectory, mouseDirectories
@@ -159,17 +175,17 @@ def main():
             aggregateResults.append(flatResults)
         except (NoDataError, IndexError), exception:  # TODO Index Error fix?
             print('Exception: {}'.format(exception))
-    saveResultsAsJson(aggregateResults)
+    # saveResultsAsJson(aggregateResults)
     saveResultsAsCSV(aggregateResults)
     print("Time to execute: {}".format(datetime.now() - startTime))
 
 
 def saveResultsAsCSV(aggregateResults):
-    pd.DataFrame(aggregateResults).to_csv('all_the_data1.csv')
+    pd.DataFrame(aggregateResults).to_csv('all_the_data.csv')
 
 
 def saveResultsAsJson(aggregateResults):
-    with open('all_the_data1.json', 'w') as fp:
+    with open('all_the_data.json', 'w') as fp:
         json.dump(aggregateResults, fp)
 
 

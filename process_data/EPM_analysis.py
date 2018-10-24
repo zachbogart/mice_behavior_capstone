@@ -17,6 +17,20 @@ from pylab import *
 import pandas as pd
 
 GOOD_ARMS = {'CR', 'CL', 'OT', 'OB', 'M'}
+CLOSED_ARMS = {'CR', 'CL'}
+ZONES = None
+MOUSE_DIRECTORY = None
+HISTOGRAMS = False
+
+
+def turnOnHistograms():
+    global HISTOGRAMS
+    HISTOGRAMS = True
+
+
+def setMouseDirectory(mouseDirectory):
+    global MOUSE_DIRECTORY
+    MOUSE_DIRECTORY = mouseDirectory
 
 
 def load_data(conditions_folder_path, start_frame=None, end_frame=None, ext='.zones.dict'):
@@ -51,6 +65,10 @@ def load_data(conditions_folder_path, start_frame=None, end_frame=None, ext='.zo
     # Covert zones to masks
     zones_masks = dict(
         [(k, vidtools.mask_from_outline(vidtools.outline_from_polygon(v), shape)) for k, v in zones.items()])
+
+    # Set ZONES as a global variable for use later
+    global ZONES
+    ZONES = zones
 
     # Set video boundaries
     if not end_frame:
@@ -164,20 +182,20 @@ def calcPosition(centroids, zones_order, results_array):
     # Split centroids into arcs of consecutive presence in an arm
     # Make dictionary that will hold the position of the mice
 
-    arcs_in_arms = {}
+    centroidsByArm = {}
     for z in zones_order:
-        arcs_in_arms[z] = [[]]
+        centroidsByArm[z] = [[]]
     for i, frame in enumerate(results_array):
         position = centroids[i]
         arm_thisFrame = zones_order[np.argmax(frame)]
         arm_lastFrame = None
         if arm_thisFrame == arm_lastFrame or arm_lastFrame == None:
-            arcs_in_arms[arm_thisFrame][-1].append(position)
+            centroidsByArm[arm_thisFrame][-1].append(position)
         else:
-            arcs_in_arms[arm_thisFrame].append([])
-            arcs_in_arms[arm_thisFrame][-1].append(position)
+            centroidsByArm[arm_thisFrame].append([])
+            centroidsByArm[arm_thisFrame][-1].append(position)
         arm_lastFrame = arm_thisFrame
-    return arcs_in_arms
+    return centroidsByArm
 
 
 def calculateCentroids(filled_in_mice_ols, shape):
@@ -199,21 +217,71 @@ def calculateCentroids(filled_in_mice_ols, shape):
     return centroids
 
 
-def calculateVelocityFeatures(distance):
+def calculateVelocityFeatures(distancesPerArm, directionsPerArm):
     # Speed in pixels per second
     fps = 30.083  # Median frames per seconds of >2000 EPM videos
-    median_speed = {k: np.median(v) * fps for k, v in distance.items()}
-    return median_speed
+
+    velocityFeatures = {}
+    for arm in GOOD_ARMS:
+        velocityFeatures[arm] = {}
+
+    for arm in distancesPerArm.keys():
+        if arm not in GOOD_ARMS:
+            continue
+        distances = distancesPerArm[arm]
+        directions = directionsPerArm[arm]
+        distancesActive = [distance for distance in distances if not isAtRest(distance)]
+        directionsActive = [direction for distance, direction in zip(distances, directions) if
+                            not isAtRest(distance)]
+
+        velocityFeatures[arm]['median_speed'] = {'total': np.median(distances) * fps}
+        velocityFeatures[arm]['average_speed'] = {'total': np.average(distances) * fps}
+        velocityFeatures[arm]['median_speed_active'] = {'total': np.median(distancesActive) * fps}
+        velocityFeatures[arm]['average_speed_active'] = {'total': np.average(distancesActive) * fps}
+
+        cardinalDirections = ['right', 'left', 'up', 'down']
+        for cardinal in cardinalDirections:
+            distancesDirection = [
+                distance for distance, direction
+                in zip(distances, directions)
+                if isInDirection(cardinal, direction)
+            ]
+            distancesDirectionActive = [
+                distance for distance, direction
+                in zip(distancesActive, directionsActive)
+                if isInDirection(cardinal, direction)
+            ]
+            velocityFeatures[arm]['median_speed'][cardinal] = np.median(distancesDirection) * fps
+            velocityFeatures[arm]['average_speed'][cardinal] = np.average(distancesDirection) * fps
+            velocityFeatures[arm]['median_speed_active'][cardinal] = np.median(distancesDirectionActive) * fps
+            velocityFeatures[arm]['average_speed_active'][cardinal] = np.average(distancesDirectionActive) * fps
+
+    return velocityFeatures
 
 
-def calculateFractionOfTimeActive(distancesPerArm):
+def isInDirection(cardinalDirection, direction):
+    if cardinalDirection == 'up':
+        return direction[1] > 0
+    elif cardinalDirection == 'down':
+        return direction[1] < 0
+    elif cardinalDirection == 'right':
+        return direction[0] > 0
+    elif cardinalDirection == 'left':
+        return direction[0] < 0
+
+
+def calculateSafety(centroidsByArm, mouseLength):
     timeActiveTotal = 0
     timeTotal = 0
     result = {}
-    for arm, distances in distancesPerArm.items():
-        if arm in GOOD_ARMS:
-            timeActiveArm = reduce(lambda count, i: count + isActive(i), distances, 0)
-            timeArm = len(distances)
+    for arm, centroids in centroidsByArm.items():
+        if arm in CLOSED_ARMS:
+            centroids = centroids[0]
+            timeActiveArm = reduce(lambda count, centroid: count + isInSafety(arm, centroid, mouseLength), centroids, 0)
+            timeArm = len(centroids)
+            distancesFromSafety = map(lambda centroid: distanceFromSafety(arm, centroid), centroids)
+            makeHistogram(distancesFromSafety, title='Distances From Safety in arm {}'.format(arm),
+                          verticalLines=[mouseLength], percentiles=[])
             if timeArm:
                 result[arm] = timeActiveArm / float(timeArm)
                 timeActiveTotal += timeActiveArm
@@ -225,13 +293,86 @@ def calculateFractionOfTimeActive(distancesPerArm):
     return result
 
 
-def isActive(speed):
+def distanceFromSafety(arm, point):
+    if arm == 'CL':
+        leftEdgeOfGoodZone = ZONES['CL'][0][0]
+        return point[0] - leftEdgeOfGoodZone
+    elif arm == 'CR':
+        rightEdgeOfGoodZone = ZONES['CR'][1][0]
+        return rightEdgeOfGoodZone - point[0]
+    return -1
+
+
+def isInSafety(arm, point, mouseLength):
+    if arm == 'CL':
+        leftEdgeOfGoodZone = ZONES['CL'][0][0]
+        return point[0] < leftEdgeOfGoodZone + mouseLength
+    elif arm == 'CR':
+        rightEdgeOfGoodZone = ZONES['CR'][1][0]
+        return point[0] > rightEdgeOfGoodZone - mouseLength
+    return False
+
+
+def calculateRest(distancesPerArm):
+    timeRestTotal = 0
+    timeTotal = 0
+    result = {}
+    for arm, distances in distancesPerArm.items():
+        if arm in GOOD_ARMS:
+            timeRestArm = reduce(lambda count, distance: count + isAtRest(distance), distances, 0)
+            makeHistogram(distances, title='Speeds in arm {}'.format(arm), percentiles=[10, 25, 50])
+            timeArm = len(distances)
+            if timeArm:
+                result[arm] = timeRestArm / float(timeArm)
+                timeRestTotal += timeRestArm
+                timeTotal += timeArm
+            else:
+                result[arm] = 0
+
+    result['all_arms'] = timeRestTotal / float(timeTotal)
+    return result
+
+
+def isAtRest(speed):
     # TODO: Figure out what the speed should be to be considered active
-    return speed > 0.5
+    return speed < 0.5
 
 
-def calculateDistanceFeatures(arcs_in_arms):
-    distancesPerArm, directionsPerArm = calculateDistances(arcs_in_arms)  # In pixels
+def isAtRestAndSafety(speed, arm, point, mouseLength):
+    safety = isInSafety(arm, point, mouseLength)
+    rest = isAtRest(speed)
+    return safety and rest
+
+
+def calculateSafetyAndRest(centroidsByArm, distancesPerArm, mouseLength):
+    timeSafeAndRestTotal = 0
+    timeTotal = 0
+    result = {}
+    for arm, centroids in centroidsByArm.items():
+        if arm in CLOSED_ARMS:
+            centroids = centroids[0]
+            distances = distancesPerArm[arm]
+            centroids = centroids[:-1]  # Remove last centroid that doesn't correspond to a distance
+
+            timeSafeAndRestArm = reduce(
+                lambda count, item: count + (isAtRestAndSafety(item[1], arm, item[0], mouseLength)),
+                zip(centroids, distances),
+                0
+            )
+            timeArm = len(centroids)
+            if timeArm:
+                result[arm] = timeSafeAndRestArm / float(timeArm)
+                timeSafeAndRestTotal += timeSafeAndRestArm
+                timeTotal += timeArm
+            else:
+                result[arm] = 0
+
+    result['all_arms'] = timeSafeAndRestTotal / float(timeTotal)
+    return result
+
+
+def calculateDistanceFeatures(centroidsByArm):
+    distancesPerArm, directionsPerArm = calculateDistances(centroidsByArm)  # In pixels
     # totalDistancePerArm = calculateTotalDistancePerArm(distancesPerArm)
     distancesPerArmSmoothed = {k: smooth(np.array(v)) for k, v in distancesPerArm.items()}
     totalDistancePerArmSmoothed = calculateTotalDistancePerArm(distancesPerArmSmoothed)
@@ -242,11 +383,11 @@ def calculateTotalDistancePerArm(distancesPerArm):
     return {k: np.sum(v) for k, v in distancesPerArm.items()}
 
 
-def calculateDistances(arcs_in_arms):
+def calculateDistances(centroidsByArm):
     # Calculate distance frame by frame
-    distancesPerArm = {k: [] for k in arcs_in_arms.keys()}
-    directionsPerArm = {k: [] for k in arcs_in_arms.keys()}
-    for arm, arcs in arcs_in_arms.items():
+    distancesPerArm = {k: [] for k in centroidsByArm.keys()}
+    directionsPerArm = {k: [] for k in centroidsByArm.keys()}
+    for arm, arcs in centroidsByArm.items():
         for arc in arcs:
             for frame in range(len(arc) - 1):
                 point1 = arc[frame]
@@ -455,31 +596,37 @@ def RegionToRegionFreq(arm_entries):
     return dict(freq)
 
 
-def makeHistogram(dataList, title='Hist'):
+def makeHistogram(dataList, title='Hist', verticalLines=[], percentiles=[]):
+    if not HISTOGRAMS:
+        return
     fig = plt.figure(figsize=(40, 20))
 
-    percentile50 = np.percentile(dataList, 50)
-    percentile75 = np.percentile(dataList, 75)
-    percentile90 = np.percentile(dataList, 90)
+    for percentile in percentiles:
+        percentileLine = np.percentile(dataList, percentile)
+        plt.axvline(x=percentileLine, color='k', linestyle='dashed', linewidth=1)
 
-    plt.hist(dataList, bins='auto')  # arguments are passed to np.histogram
-    plt.axvline(x=percentile50, color='k', linestyle='dashed', linewidth=1)
-    plt.axvline(x=percentile75, color='k', linestyle='dashed', linewidth=1)
-    plt.axvline(x=percentile90, color='k', linestyle='dashed', linewidth=1)
+    for verticalLine in verticalLines:
+        plt.axvline(x=verticalLine, color='red', linestyle='dashed', linewidth=1)
+
+    plt.hist(dataList, bins='auto')
     plt.title(title)
     plt.xlabel("Value")
     plt.ylabel("Frequency")
     plt.show()
-    fig.savefig(title + '.png')
+    mouseDirectoryPath = 'Basic Data/{}'.format(MOUSE_DIRECTORY)
+    if not os.path.isdir(mouseDirectoryPath):
+        os.makedirs(mouseDirectoryPath)
+    fig.savefig('{}/{}.png'.format(mouseDirectoryPath, title))
     # with open('mouseSizes.csv', 'wb') as myfile:
     #     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
     #     wr.writerow(mouseSizeOverTime)
 
 
 def calculateMouseSize(filled_in_mice_ols):
-    mouseSizeOverTime = []
-    mouseWidthOverTime = []
-    mouseHeightOverTime = []
+    # mouseSizeOverTime = []
+    # mouseWidthOverTime = []
+    # mouseHeightOverTime = []
+    mouseLengthOverTime = []
     for boundaryBox in filled_in_mice_ols:
         xMin = 1000
         xMax = -1
@@ -498,15 +645,22 @@ def calculateMouseSize(filled_in_mice_ols):
                 yMax = y
         mouseWidth = xMax - xMin
         mouseHeight = yMax - yMin
-        mouseSize = mouseWidth * mouseHeight
-        mouseHeightOverTime.append(mouseHeight)
-        mouseWidthOverTime.append(mouseWidth)
-        mouseSizeOverTime.append(mouseSize)
+        # mouseSize = mouseWidth * mouseHeight
+        mouseLength = max(mouseWidth, mouseHeight)
+        # mouseHeightOverTime.append(mouseHeight)
+        # mouseWidthOverTime.append(mouseWidth)
+        # mouseSizeOverTime.append(mouseSize)
+        mouseLengthOverTime.append(mouseLength)
 
     # makeHistogram(mouseWidthOverTime, 'MouseWidth')
     # makeHistogram(mouseHeightOverTime, 'MouseHeight')
     # makeHistogram(mouseSizeOverTime, 'MouseSize')
-    return np.percentile(mouseSizeOverTime, 90)
+    makeHistogram(mouseLengthOverTime, 'MouseLength', percentiles=[50, 75, 90])
+    # mouseWidth = np.percentile(mouseWidthOverTime, 90)
+    # mouseHeight = np.percentile(mouseHeightOverTime, 90)
+    mouseLength = np.percentile(mouseLengthOverTime, 90)  # TODO: Fix this
+    # mouseSize = np.percentile(mouseSizeOverTime, 90)
+    return mouseLength
 
 
 def extractMouseFeatures(outer_directory):
