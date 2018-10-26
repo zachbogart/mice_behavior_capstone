@@ -86,6 +86,7 @@ def process_directory(parentDirectory, mouseDirectory):
         'active_fraction': restFractionPerArm,
         'safety_fraction': safetyFractionsPerArm,
         'safety_and_rest_fraction': safetyAndRestFractionsPerArm,
+        'peeking': peakingFeatures,
         'backtrack_counts': backtrackCounts,
     }
     return results
@@ -148,8 +149,8 @@ def extractContentDirectory(mouseDirectory, parentDirectory):
 
 def getMouseDirectories():
     currentDirectory = os.getcwd()
-    # parentDirectory = os.path.join(currentDirectory, "Mice_Capstone_data_files")
-    parentDirectory = os.path.join(currentDirectory, "EPM_data")
+    parentDirectory = os.path.join(currentDirectory, "Mice_Capstone_data_files")
+    # parentDirectory = os.path.join(currentDirectory, "EPM_data")
     mouseDirectories = os.listdir(parentDirectory)
     mouseDirectories.sort()
     return parentDirectory, mouseDirectories

@@ -372,7 +372,7 @@ def calculateRestFeatures(distancesPerArm):
                 timeRestTotalMiddle += timeRestArm
                 timeTotalMiddle += timeArm
         else:  # Mouse never in this arm
-            restFeatures[arm] = 0
+            restFeatures[arm] = None
 
         # For analysis we graph the speeds of the mouse to see where cutoff should be for 'at rest'
         makeHistogram(distances, title='Speeds in arm {}'.format(arm), percentiles=[10, 25, 50])
@@ -389,13 +389,76 @@ def isResting(speed):
     return speed < threshold
 
 
-def isRestingAndSafe(speed, arm, point, mouseLength):
-    safe = isSafe(arm, point, mouseLength)
+def isPeeking(arm, mouseLocation, mouseLength):
+    if arm == 'CL':
+        rightEndOfArm = ZONES['CL'][1][0]
+        return mouseLocation[0] > rightEndOfArm - mouseLength
+    elif arm == 'CR':
+        leftEndOfArm = ZONES['CR'][0][0]
+        return mouseLocation[0] < leftEndOfArm + mouseLength
+    return False
+
+
+def isRestingAndPeeking(speed, arm, mouseLocation, mouseLength):
+    safe = isPeeking(arm, mouseLocation, mouseLength)
     resting = isResting(speed)
     return safe and resting
 
 
 def calculatePeekingFeatures(centroidsByArm, distancesPerArm, mouseLength):
+    timePeekingTotal = 0
+    timeTotal = 0
+    peekLengthsTotal = []
+    peekingFeatures = {}
+    for arm in CLOSED_ARMS:
+        centroids = centroidsByArm[arm][0]
+        centroids = centroids[:-1]  # Remove last centroid that doesn't correspond to a distance
+        distances = distancesPerArm[arm]
+
+        minFramesBetweenPeeks = 10
+
+        numPreviousPeeking = 0
+        numPreviousNotPeeking = minFramesBetweenPeeks + 1
+        peekLengths = []
+
+        for frame, (centroid, distance) in enumerate(zip(centroids, distances)):
+            if isRestingAndPeeking(distance, arm, centroid, mouseLength):
+                if numPreviousNotPeeking <= minFramesBetweenPeeks and numPreviousNotPeeking and peekLengths:
+                    # This hits if the last peek was not far enough away, so we continue that peek
+                    numPreviousPeeking = peekLengths.pop() + numPreviousNotPeeking
+                numPreviousNotPeeking = 0
+                numPreviousPeeking += 1
+            else:
+                if numPreviousPeeking:
+                    peekLengths.append(numPreviousPeeking)
+                numPreviousNotPeeking += 1
+                numPreviousPeeking = 0
+        if numPreviousPeeking:
+            peekLengths.append(numPreviousPeeking)
+
+        minPeekLength = 5
+        peekLengths = filter(lambda peekLength: peekLength > minPeekLength, peekLengths)
+
+        timePeekingArm = np.sum(peekLengths)
+        timeArm = len(centroids)
+        if timeArm:
+            peekingFeatures['count_{}'.format(arm)] = len(peekLengths)
+            peekingFeatures['fraction_{}'.format(arm)] = timePeekingArm / float(timeArm)
+            peekingFeatures['average_length_{}'.format(arm)] = np.average(peekLengths) * FPS
+            peekingFeatures['median_length_{}'.format(arm)] = np.median(peekLengths) * FPS
+            timePeekingTotal += timePeekingArm
+            timeTotal += timeArm
+            peekLengthsTotal.extend(peekLengths)
+        else:  # Mouse never in this arm
+            peekingFeatures['fraction_{}'.format(arm)] = None
+
+    peekingFeatures['count_total'] = len(peekLengths)
+    peekingFeatures['fraction_total'] = timePeekingTotal / float(timeTotal)
+    peekingFeatures['average_length_total'] = np.average(peekLengthsTotal) * FPS
+    peekingFeatures['median_length_total'] = np.median(peekLengthsTotal) * FPS
+
+    return peekingFeatures
+
     # TODO: Calculate these
     # A peek is defined as being at rest and located the side of a closed arm closest to the middle arm.
     peekingFeatures = {}
@@ -413,6 +476,12 @@ def calculatePeekingFeatures(centroidsByArm, distancesPerArm, mouseLength):
     pass
 
 
+def isRestingAndSafe(speed, arm, mouseLocation, mouseLength):
+    safe = isSafe(arm, mouseLocation, mouseLength)
+    resting = isResting(speed)
+    return safe and resting
+
+
 def calculateSafeAndRestingFeatures(centroidsByArm, distancesPerArm, mouseLength):
     timeSafeAndRestTotal = 0
     timeTotal = 0
@@ -423,7 +492,7 @@ def calculateSafeAndRestingFeatures(centroidsByArm, distancesPerArm, mouseLength
         distances = distancesPerArm[arm]
 
         timeSafeAndRestArm = reduce(
-            lambda count, item: count + (isRestingAndSafe(item[1], arm, item[0], mouseLength)),
+            lambda count, item: count + isRestingAndSafe(item[1], arm, item[0], mouseLength),
             zip(centroids, distances),
             0
         )
@@ -570,34 +639,6 @@ def calculateArmEntries(zones_order, results_array, start_frame, end_frame, cond
     # close(1)
 
     return fraction_in_arms, tot_arm_entries, frames_in_arms, arm_entries  # ,xplor_frac
-
-
-def saveResults(conditions_folder, results_array, frac_in_arms, arm_entries, tot_arm_entries, frames_in_arms,
-                total_distance, total_smoothed_distance, median_speed, smoothed_median_speed):
-    np.save(os.path.join(conditions_folder, 'results_array.npy'), results_array)
-    # np.save(conditions_folder+'/results_array.npy', results_array)
-
-    results = {'frac_in_arms': frac_in_arms,
-               'arm_entries': arm_entries,
-               'tot_arm_entries': tot_arm_entries,
-               'frames_in_arms': frames_in_arms,
-               'total_distance': total_distance,
-               'total_smoothed_distance': total_smoothed_distance,
-               'median_speed': median_speed,
-               'smoothed_median_speed': smoothed_median_speed
-               }
-    with open(os.path.join(conditions_folder, 'results.pkl'), 'w') as file_path:
-        pickle.dump(results, file_path)
-    # open(conditions_folder+'/fracInArms.dict', 'w').write(frac_in_arms.__repr__())
-    # # Filter arm_entries so only contains arms
-    # [tot_arm_entries.pop(key) for key in tot_arm_entries.keys() if 'F' in key or 'M' in key]
-    # open(conditions_folder+'/armEntries.list', 'w').write(arm_entries.__repr__())
-    # open(conditions_folder+'/totArmEntries.dict', 'w').write(tot_arm_entries.__repr__())
-    # open(conditions_folder+'/framesInArms.dict', 'w').write(frames_in_arms.__repr__())
-    # open(conditions_folder+'/distance.dict', 'w').write(total_distance.__repr__())
-    # open(conditions_folder+'/smoothedDistance.dict', 'w').write(smoothed_distance.__repr__())
-    # open(conditions_folder+'/medianSpeed.dict', 'w').write(median_speed.__repr__())
-    # open(conditions_folder+'/smoothedMedianSpeed.dict', 'w').write(smoothed_median_speed.__repr__())
 
 
 def calculateTurningPreference(arm_entries):
@@ -830,3 +871,31 @@ def makeHistogram(dataList, title='Hist', verticalLines=[], percentiles=[]):
     # with open('mouseSizes.csv', 'wb') as myfile:
     #     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
     #     wr.writerow(mouseSizeOverTime)
+
+
+def saveResults(conditions_folder, results_array, frac_in_arms, arm_entries, tot_arm_entries, frames_in_arms,
+                total_distance, total_smoothed_distance, median_speed, smoothed_median_speed):
+    np.save(os.path.join(conditions_folder, 'results_array.npy'), results_array)
+    # np.save(conditions_folder+'/results_array.npy', results_array)
+
+    results = {'frac_in_arms': frac_in_arms,
+               'arm_entries': arm_entries,
+               'tot_arm_entries': tot_arm_entries,
+               'frames_in_arms': frames_in_arms,
+               'total_distance': total_distance,
+               'total_smoothed_distance': total_smoothed_distance,
+               'median_speed': median_speed,
+               'smoothed_median_speed': smoothed_median_speed
+               }
+    with open(os.path.join(conditions_folder, 'results.pkl'), 'w') as file_path:
+        pickle.dump(results, file_path)
+    # open(conditions_folder+'/fracInArms.dict', 'w').write(frac_in_arms.__repr__())
+    # # Filter arm_entries so only contains arms
+    # [tot_arm_entries.pop(key) for key in tot_arm_entries.keys() if 'F' in key or 'M' in key]
+    # open(conditions_folder+'/armEntries.list', 'w').write(arm_entries.__repr__())
+    # open(conditions_folder+'/totArmEntries.dict', 'w').write(tot_arm_entries.__repr__())
+    # open(conditions_folder+'/framesInArms.dict', 'w').write(frames_in_arms.__repr__())
+    # open(conditions_folder+'/distance.dict', 'w').write(total_distance.__repr__())
+    # open(conditions_folder+'/smoothedDistance.dict', 'w').write(smoothed_distance.__repr__())
+    # open(conditions_folder+'/medianSpeed.dict', 'w').write(median_speed.__repr__())
+    # open(conditions_folder+'/smoothedMedianSpeed.dict', 'w').write(smoothed_median_speed.__repr__())
