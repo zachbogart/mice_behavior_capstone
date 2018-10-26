@@ -1,12 +1,3 @@
-#!/usr/bin/env python
-# Takes one main argument, the folder containing the conditions to analyze (e.g. '20121116_150819_EPM_BW_229/analysis/4975-7475_man-thresh-0.250/')
-# and two optional arguments: a starting frame to analyze (or 'None') and an end frame (or 'None')
-# Version control
-# 0.0.2 2014-11-24
-# Analyze distance travelled and speed
-# 0.0.3 2016-01-11
-# Fixed path issues in load_data and chnaged opening to 'with open'
-# Fixed problems with calcPosition
 from collections import defaultdict
 
 import Util, tarfile, os, sys
@@ -18,9 +9,16 @@ import pandas as pd
 
 GOOD_ARMS = {'CR', 'CL', 'OT', 'OB', 'M'}
 CLOSED_ARMS = {'CR', 'CL'}
+OPEN_ARMS = {'OT', 'OB'}
+ARM_ORDER = ['F1', 'F2', 'F3', 'F4', 'CL', 'M', 'OB', 'CR', 'OT']
+
+HISTOGRAMS = False  # If this is set to true, we will save histograms for analysis
 ZONES = None
 MOUSE_DIRECTORY = None
-HISTOGRAMS = False
+
+# Speed in pixels per second
+# Median frames per seconds of >2000 EPM videos
+FPS = 30.083
 
 
 def turnOnHistograms():
@@ -173,7 +171,7 @@ def fill_in_missing_outlines(mice_ols):
     return filled_in_mice_ols
 
 
-def calcPosition(centroids, zones_order, results_array):
+def calculateCentroidsByArm(centroids, zones_order, results_array):
     """
     Finds the position of the largest outline in each frame
     """
@@ -183,13 +181,14 @@ def calcPosition(centroids, zones_order, results_array):
     # Make dictionary that will hold the position of the mice
 
     centroidsByArm = {}
+    arm_lastFrame = None
     for z in zones_order:
         centroidsByArm[z] = [[]]
     for i, frame in enumerate(results_array):
         position = centroids[i]
         arm_thisFrame = zones_order[np.argmax(frame)]
         arm_lastFrame = None
-        if arm_thisFrame == arm_lastFrame or arm_lastFrame == None:
+        if arm_thisFrame == arm_lastFrame or arm_lastFrame is None:
             centroidsByArm[arm_thisFrame][-1].append(position)
         else:
             centroidsByArm[arm_thisFrame].append([])
@@ -212,179 +211,253 @@ def calculateCentroids(filled_in_mice_ols, shape):
             ol = fr[0]
         centroids.append(vidtools.centroid(ol, shape, cm))
 
-    centroidDF = pd.DataFrame(centroids)
-    centroidDF.to_csv('centroids.csv')
+    # centroidDF = pd.DataFrame(centroids)
+    # centroidDF.to_csv('centroids.csv')
     return centroids
 
 
-def calculateVelocityFeatures(distancesPerArm, directionsPerArm):
-    # Speed in pixels per second
-    fps = 30.083  # Median frames per seconds of >2000 EPM videos
+def calculateVelocitySummaryStatistics(distances):
+    """
+    Given distances, compute all summary statistics that we want from both that list and
+    a list filtered for only times when the mouse is not 'at rest'
+    :param distances: a list of distances (or speeds) over time
+    """
+    distancesActive = [distance for distance in distances if not isResting(distance)]
+    return {
+        'median_speed': np.median(distances) * FPS,
+        'average_speed': np.average(distances) * FPS,
+        'median_speed_active': np.median(distancesActive) * FPS,
+        'average_speed_active': np.average(distancesActive) * FPS,
+    }
 
+
+def calculateVelocityFeatures(distancesPerArm, directionsPerArm):
     velocityFeatures = {}
     for arm in GOOD_ARMS:
         velocityFeatures[arm] = {}
 
-    for arm in distancesPerArm.keys():
-        if arm not in GOOD_ARMS:
-            continue
-        distances = distancesPerArm[arm]
-        directions = directionsPerArm[arm]
-        distancesActive = [distance for distance in distances if not isAtRest(distance)]
-        directionsActive = [direction for distance, direction in zip(distances, directions) if
-                            not isAtRest(distance)]
+    # EX: distancesClosedTowardsMiddle means a list of distances while in a closed arm and
+    #     moving towards the middle arm
+    distancesClosedTowardsMiddle = []
+    distancesClosedTowardsOutside = []
+    distancesOpenTowardsMiddle = []
+    distancesOpenTowardsOutside = []
 
-        velocityFeatures[arm]['median_speed'] = {'total': np.median(distances) * fps}
-        velocityFeatures[arm]['average_speed'] = {'total': np.average(distances) * fps}
-        velocityFeatures[arm]['median_speed_active'] = {'total': np.median(distancesActive) * fps}
-        velocityFeatures[arm]['average_speed_active'] = {'total': np.average(distancesActive) * fps}
+    # Map from an arm and a cardinal direction to one of our distance lists above
+    armCardinalCombinationMap = {
+        'CLright': distancesClosedTowardsMiddle,
+        'CLleft': distancesClosedTowardsOutside,
+        'CRright': distancesClosedTowardsOutside,
+        'CRleft': distancesClosedTowardsMiddle,
+        'OTup': distancesOpenTowardsOutside,
+        'OTdown': distancesOpenTowardsMiddle,
+        'OBup': distancesOpenTowardsMiddle,
+        'OBdown': distancesOpenTowardsOutside,
+    }
+
+    for arm in GOOD_ARMS:
+        distances = distancesPerArm[arm]
+        directionVectors = directionsPerArm[arm]
+
+        # Find the basic statistics for each arm
+        velocityFeatures[arm]['total'] = calculateVelocitySummaryStatistics(distances)
 
         cardinalDirections = ['right', 'left', 'up', 'down']
         for cardinal in cardinalDirections:
-            distancesDirection = [
-                distance for distance, direction
-                in zip(distances, directions)
-                if isInDirection(cardinal, direction)
+            distancesCardinal = [
+                distance for distance, directionVector
+                in zip(distances, directionVectors)
+                if isMovingInCardinalDirection(cardinal, directionVector)
             ]
-            distancesDirectionActive = [
-                distance for distance, direction
-                in zip(distancesActive, directionsActive)
-                if isInDirection(cardinal, direction)
-            ]
-            velocityFeatures[arm]['median_speed'][cardinal] = np.median(distancesDirection) * fps
-            velocityFeatures[arm]['average_speed'][cardinal] = np.average(distancesDirection) * fps
-            velocityFeatures[arm]['median_speed_active'][cardinal] = np.median(distancesDirectionActive) * fps
-            velocityFeatures[arm]['average_speed_active'][cardinal] = np.average(distancesDirectionActive) * fps
+            # Find summary statistics for each cardinal direction
+            velocityFeatures[arm][cardinal] = calculateVelocitySummaryStatistics(distancesCardinal)
+
+            # Add distances to one of the lists above based on armCardinalCombinationMap
+            armAndCardinal = arm + cardinal
+            if armAndCardinal in armCardinalCombinationMap:
+                armCardinalCombinationMap[armAndCardinal].extend(distancesCardinal)
+
+    # Find summary statistics for each of the following options
+    featureToList = {
+        'closed_towards_middle': distancesClosedTowardsMiddle,
+        'closed_towards_outside': distancesClosedTowardsOutside,
+        'open_towards_middle': distancesOpenTowardsMiddle,
+        'open_towards_outside': distancesOpenTowardsOutside,
+    }
+    for featureName, distances in featureToList.items():
+        velocityFeatures[featureName] = calculateVelocitySummaryStatistics(distances)
 
     return velocityFeatures
 
 
-def isInDirection(cardinalDirection, direction):
+def isMovingInCardinalDirection(cardinalDirection, directionVector):
     if cardinalDirection == 'up':
-        return direction[1] > 0
+        return directionVector[1] > 0
     elif cardinalDirection == 'down':
-        return direction[1] < 0
+        return directionVector[1] < 0
     elif cardinalDirection == 'right':
-        return direction[0] > 0
+        return directionVector[0] > 0
     elif cardinalDirection == 'left':
-        return direction[0] < 0
+        return directionVector[0] < 0
 
 
-def calculateSafety(centroidsByArm, mouseLength):
-    timeActiveTotal = 0
+def calculateSafetyFeatures(centroidsByArm, mouseLength):
+    timeSafetyTotal = 0
     timeTotal = 0
-    result = {}
-    for arm, centroids in centroidsByArm.items():
-        if arm in CLOSED_ARMS:
-            centroids = centroids[0]
-            timeActiveArm = reduce(lambda count, centroid: count + isInSafety(arm, centroid, mouseLength), centroids, 0)
-            timeArm = len(centroids)
-            distancesFromSafety = map(lambda centroid: distanceFromSafety(arm, centroid), centroids)
-            makeHistogram(distancesFromSafety, title='Distances From Safety in arm {}'.format(arm),
-                          verticalLines=[mouseLength], percentiles=[])
-            if timeArm:
-                result[arm] = timeActiveArm / float(timeArm)
-                timeActiveTotal += timeActiveArm
-                timeTotal += timeArm
-            else:
-                result[arm] = 0
+    safetyFeatures = {}
+    for arm in CLOSED_ARMS:
+        centroids = centroidsByArm[arm][0]
+        timeSafetyArm = reduce(lambda count, centroid: count + isSafe(arm, centroid, mouseLength), centroids, 0)
+        timeArm = len(centroids)
 
-    result['all_arms'] = timeActiveTotal / float(timeTotal)
-    return result
+        if timeArm:
+            safetyFeatures[arm] = timeSafetyArm / float(timeArm)
+            timeSafetyTotal += timeSafetyArm
+            timeTotal += timeArm
+        else:  # Mouse never in this arm
+            safetyFeatures[arm] = None
+
+        # For analysis we graph how far the mouse is from the end. We want to find the
+        # cutoff for the mouse to be in safety
+        distancesFromEndOfArm = map(lambda centroid: distanceFromEndOfArm(arm, centroid), centroids)
+        makeHistogram(distancesFromEndOfArm, title='Distances From Safety in arm {}'.format(arm),
+                      verticalLines=[mouseLength], percentiles=[])
+
+    safetyFeatures['closed_arms'] = timeSafetyTotal / float(timeTotal)
+    return safetyFeatures
 
 
-def distanceFromSafety(arm, point):
+def distanceFromEndOfArm(arm, point):
     if arm == 'CL':
-        leftEdgeOfGoodZone = ZONES['CL'][0][0]
-        return point[0] - leftEdgeOfGoodZone
+        leftEdgeOfArm = ZONES['CL'][0][0]
+        return point[0] - leftEdgeOfArm
     elif arm == 'CR':
-        rightEdgeOfGoodZone = ZONES['CR'][1][0]
-        return rightEdgeOfGoodZone - point[0]
+        rightEdgeOfArm = ZONES['CR'][1][0]
+        return rightEdgeOfArm - point[0]
     return -1
 
 
-def isInSafety(arm, point, mouseLength):
+def isSafe(arm, mouseLocation, mouseLength):
     if arm == 'CL':
         leftEdgeOfGoodZone = ZONES['CL'][0][0]
-        return point[0] < leftEdgeOfGoodZone + mouseLength
+        return mouseLocation[0] < leftEdgeOfGoodZone + mouseLength
     elif arm == 'CR':
         rightEdgeOfGoodZone = ZONES['CR'][1][0]
-        return point[0] > rightEdgeOfGoodZone - mouseLength
+        return mouseLocation[0] > rightEdgeOfGoodZone - mouseLength
     return False
 
 
-def calculateRest(distancesPerArm):
-    timeRestTotal = 0
-    timeTotal = 0
-    result = {}
-    for arm, distances in distancesPerArm.items():
-        if arm in GOOD_ARMS:
-            timeRestArm = reduce(lambda count, distance: count + isAtRest(distance), distances, 0)
-            makeHistogram(distances, title='Speeds in arm {}'.format(arm), percentiles=[10, 25, 50])
-            timeArm = len(distances)
-            if timeArm:
-                result[arm] = timeRestArm / float(timeArm)
-                timeRestTotal += timeRestArm
-                timeTotal += timeArm
+def calculateRestFeatures(distancesPerArm):
+    timeRestTotalOpen = 0
+    timeTotalOpen = 0
+    timeRestTotalClosed = 0
+    timeTotalClosed = 0
+    timeRestTotalMiddle = 0
+    timeTotalMiddle = 0
+
+    restFeatures = {}
+    for arm in GOOD_ARMS:
+        distances = distancesPerArm[arm]
+        timeRestArm = reduce(lambda count, distance: count + isResting(distance), distances, 0)
+        timeArm = len(distances)
+        if timeArm:
+            restFeatures[arm] = timeRestArm / float(timeArm)
+            if arm in OPEN_ARMS:
+                timeRestTotalOpen += timeRestArm
+                timeTotalOpen += timeArm
+            elif arm in CLOSED_ARMS:
+                timeRestTotalClosed += timeRestArm
+                timeTotalClosed += timeArm
             else:
-                result[arm] = 0
+                timeRestTotalMiddle += timeRestArm
+                timeTotalMiddle += timeArm
+        else:  # Mouse never in this arm
+            restFeatures[arm] = 0
 
-    result['all_arms'] = timeRestTotal / float(timeTotal)
-    return result
+        # For analysis we graph the speeds of the mouse to see where cutoff should be for 'at rest'
+        makeHistogram(distances, title='Speeds in arm {}'.format(arm), percentiles=[10, 25, 50])
 
-
-def isAtRest(speed):
-    # TODO: Figure out what the speed should be to be considered active
-    return speed < 0.5
-
-
-def isAtRestAndSafety(speed, arm, point, mouseLength):
-    safety = isInSafety(arm, point, mouseLength)
-    rest = isAtRest(speed)
-    return safety and rest
+    restFeatures['open_arms'] = timeRestTotalOpen / float(timeTotalOpen)
+    restFeatures['closed_arms'] = timeRestTotalClosed / float(timeTotalClosed)
+    restFeatures['all_arms'] = (timeRestTotalOpen + timeRestTotalClosed + timeRestTotalMiddle) / \
+                               float(timeTotalClosed + timeTotalOpen + timeTotalMiddle)
+    return restFeatures
 
 
-def calculateSafetyAndRest(centroidsByArm, distancesPerArm, mouseLength):
+def isResting(speed):
+    threshold = 0.5  # TODO: Figure out what the speed this should be to be considered active
+    return speed < threshold
+
+
+def isRestingAndSafe(speed, arm, point, mouseLength):
+    safe = isSafe(arm, point, mouseLength)
+    resting = isResting(speed)
+    return safe and resting
+
+
+def calculatePeekingFeatures(centroidsByArm, distancesPerArm, mouseLength):
+    # TODO: Calculate these
+    # A peek is defined as being at rest and located the side of a closed arm closest to the middle arm.
+    peekingFeatures = {}
+    peekingFeatures['average_peek_time'] = None
+    peekingFeatures['median_peek_time'] = None
+    peekingFeatures['CL_num_peeks'] = None
+    peekingFeatures['CR_num_peeks'] = None
+    peekingFeatures['closed_num_peeks'] = None
+    peekingFeatures['CL_fraction_time_peeking'] = None
+    peekingFeatures['CR_fraction_time_peeking'] = None
+    peekingFeatures['closed_fraction_time_peeking'] = None
+    peekingFeatures['CL_fraction_num_peeks_over_num_closed_to_open_turns'] = None
+    peekingFeatures['CR_fraction_num_peeks_over_num_closed_to_open_turns'] = None
+    peekingFeatures['closed_fraction_num_peeks_over_num_closed_to_open_turns'] = None
+    pass
+
+
+def calculateSafeAndRestingFeatures(centroidsByArm, distancesPerArm, mouseLength):
     timeSafeAndRestTotal = 0
     timeTotal = 0
-    result = {}
-    for arm, centroids in centroidsByArm.items():
-        if arm in CLOSED_ARMS:
-            centroids = centroids[0]
-            distances = distancesPerArm[arm]
-            centroids = centroids[:-1]  # Remove last centroid that doesn't correspond to a distance
+    safeAndRestingFeatures = {}
+    for arm in CLOSED_ARMS:
+        centroids = centroidsByArm[arm][0]
+        centroids = centroids[:-1]  # Remove last centroid that doesn't correspond to a distance
+        distances = distancesPerArm[arm]
 
-            timeSafeAndRestArm = reduce(
-                lambda count, item: count + (isAtRestAndSafety(item[1], arm, item[0], mouseLength)),
-                zip(centroids, distances),
-                0
-            )
-            timeArm = len(centroids)
-            if timeArm:
-                result[arm] = timeSafeAndRestArm / float(timeArm)
-                timeSafeAndRestTotal += timeSafeAndRestArm
-                timeTotal += timeArm
-            else:
-                result[arm] = 0
+        timeSafeAndRestArm = reduce(
+            lambda count, item: count + (isRestingAndSafe(item[1], arm, item[0], mouseLength)),
+            zip(centroids, distances),
+            0
+        )
+        timeArm = len(centroids)
+        if timeArm:
+            safeAndRestingFeatures[arm] = timeSafeAndRestArm / float(timeArm)
+            timeSafeAndRestTotal += timeSafeAndRestArm
+            timeTotal += timeArm
+        else:  # Mouse never in this arm
+            safeAndRestingFeatures[arm] = 0
 
-    result['all_arms'] = timeSafeAndRestTotal / float(timeTotal)
-    return result
+    safeAndRestingFeatures['closed_arms'] = timeSafeAndRestTotal / float(timeTotal)
+    return safeAndRestingFeatures
 
 
 def calculateDistanceFeatures(centroidsByArm):
-    distancesPerArm, directionsPerArm = calculateDistances(centroidsByArm)  # In pixels
+    distancesPerArm, directionsPerArm = calculateDistancesByArm(centroidsByArm)  # In pixels
     # totalDistancePerArm = calculateTotalDistancePerArm(distancesPerArm)
-    distancesPerArmSmoothed = {k: smooth(np.array(v)) for k, v in distancesPerArm.items()}
+
+    distancesPerArmSmoothed = smoothDistancesByArm(distancesPerArm)
     totalDistancePerArmSmoothed = calculateTotalDistancePerArm(distancesPerArmSmoothed)
+
     return distancesPerArmSmoothed, directionsPerArm, totalDistancePerArmSmoothed
+
+
+def smoothDistancesByArm(distancesPerArm):
+    return {arm: smooth(np.array(distances)) for arm, distances in distancesPerArm.items()}
 
 
 def calculateTotalDistancePerArm(distancesPerArm):
     return {k: np.sum(v) for k, v in distancesPerArm.items()}
 
 
-def calculateDistances(centroidsByArm):
-    # Calculate distance frame by frame
+def calculateDistancesByArm(centroidsByArm):
     distancesPerArm = {k: [] for k in centroidsByArm.keys()}
     directionsPerArm = {k: [] for k in centroidsByArm.keys()}
     for arm, arcs in centroidsByArm.items():
@@ -392,42 +465,39 @@ def calculateDistances(centroidsByArm):
             for frame in range(len(arc) - 1):
                 point1 = arc[frame]
                 point2 = arc[frame + 1]
-                vectorLength = calculateVectorLength(point1, point2)
-                vectorDirection = calculateVectorDirection(point1, point2, vectorLength)
+                vectorLength, vectorDirection = calculateVectorStatistics(point1, point2)
 
                 distancesPerArm[arm].append(vectorLength)
                 directionsPerArm[arm].append(vectorDirection)
     return distancesPerArm, directionsPerArm
 
 
-def calculateVectorLength(point1, point2):
-    return np.sqrt(((point2[0] - point1[0]) ** 2) + (point2[1] - point1[1]) ** 2)
-
-
-def calculateVectorDirection(point1, point2, vectorLength):
+def calculateVectorStatistics(point1, point2):
+    vectorLength = np.sqrt(((point2[0] - point1[0]) ** 2) + (point2[1] - point1[1]) ** 2)
     directionVector = (point2[0] - point1[0], point2[1] - point1[1])
-    return directionVector / vectorLength
+    directionVectorNormalized = [coordinate / vectorLength for coordinate in directionVector]
+    return vectorLength, directionVectorNormalized
 
 
 def smooth(x, window_len=10, window='flat'):
-    '''
+    """
     from http://wiki.scipy.org/Cookbook/SignalSmooth
     smooth the data using a window with requested size.
-    
+
     This method is based on the convolution of a scaled window with the signal.
-    The signal is prepared by introducing reflected copies of the signal 
+    The signal is prepared by introducing reflected copies of the signal
     (with the window size) in both ends so that transient parts are minimized
     in the begining and end part of the output signal.
-    
+
     input:
-        x: the input signal 
+        x: the input signal
         window_len: the dimension of the smoothing window; should be an odd integer
         window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
             flat window will produce a moving average smoothing.
 
     output:
         the smoothed signal, unless x.size < window_len, in which case returns the raw data
-    '''
+    """
 
     if x.ndim != 1:
         raise ValueError, "smooth only accepts 1 dimension arrays."
@@ -453,12 +523,24 @@ def calculateArmEntries(zones_order, results_array, start_frame, end_frame, cond
     tot = float(sum([a.sum() for a in results_array[start_frame:end_frame].transpose()]))
     # pixels_in_zones can assign 'residence time' to multiple zones if mouse is in multiple zones at a time
     pixels_in_zones = dict(zip(zones_order, [a.sum() / tot for a in results_array[start_frame:end_frame].transpose()]))
-    frac_in_openArms = pixels_in_zones['OB'] + pixels_in_zones['OT']
-    frac_in_closedArms = pixels_in_zones['CL'] + pixels_in_zones['CR']
-    frac_in_middle = pixels_in_zones['M']
-    frac_in_closedAndMiddle = frac_in_closedArms + frac_in_middle
-    frac_in_arms = {'frac_in_openArms': frac_in_openArms, 'frac_in_closedArms': frac_in_closedArms,
-                    'frac_in_closedAndMiddle': frac_in_closedAndMiddle, 'frac_in_middle': frac_in_middle}
+    fraction_in_openArms = pixels_in_zones['OB'] + pixels_in_zones['OT']
+    fraction_in_closedArms = pixels_in_zones['CL'] + pixels_in_zones['CR']
+    fraction_in_middle = pixels_in_zones['M']
+    fraction_in_closedAndMiddle = fraction_in_closedArms + fraction_in_middle
+    fraction_in_left = pixels_in_zones['CL']
+    fraction_in_right = pixels_in_zones['CR']
+    fraction_in_top = pixels_in_zones['OT']
+    fraction_in_bottom = pixels_in_zones['OB']
+    fraction_in_arms = {
+        'open-arms': fraction_in_openArms,
+        'closed': fraction_in_closedArms,
+        'closed_and_middle': fraction_in_closedAndMiddle,
+        'middle': fraction_in_middle,
+        'left': fraction_in_left,
+        'right': fraction_in_right,
+        'top': fraction_in_top,
+        'bottom': fraction_in_bottom,
+    }
     arm_entries, tot_arm_entries = arm_entry(results_array, zones_order)
     # frames_in_arms assigns position of mouse to where the majority of his area is located.
     frames_in_arms = time_in_arms(results_array, zones_order)
@@ -487,7 +569,7 @@ def calculateArmEntries(zones_order, results_array, start_frame, end_frame, cond
     # savefig(conditions_folder + '/arm_residence_entries.pdf') # TODO: Why are we saving this?
     # close(1)
 
-    return frac_in_arms, tot_arm_entries, frames_in_arms, arm_entries  # ,xplor_frac
+    return fraction_in_arms, tot_arm_entries, frames_in_arms, arm_entries  # ,xplor_frac
 
 
 def saveResults(conditions_folder, results_array, frac_in_arms, arm_entries, tot_arm_entries, frames_in_arms,
@@ -519,47 +601,111 @@ def saveResults(conditions_folder, results_array, frac_in_arms, arm_entries, tot
 
 
 def calculateTurningPreference(arm_entries):
-    num_left = 0
-    num_right = 0
-    num_straight = 0
-    num_back = 0
-
     entries = sorted([entry for zones in arm_entries for entry in zones])
     arm_entries_tuple = [(entry, zone) for zone, subentries in enumerate(arm_entries) for entry in subentries]
     entries_dict = dict(arm_entries_tuple)
 
-    turn_left = [(4, 8), (8, 7), (7, 6), (6, 4)]
-    turn_right = [(8, 4), (7, 8), (6, 7), (4, 6)]
-    go_straight = [(4, 7), (7, 4), (6, 8), (8, 6)]
-    go_back = [(4, 4), (6, 6), (7, 7), (8, 8)]
+    # Collect number of turns in each category
+    num_left_into_open = 0
+    num_right_into_open = 0
+    num_straight_into_open = 0
+    num_back_into_open = 0
+    num_left_into_closed = 0
+    num_right_into_closed = 0
+    num_straight_into_closed = 0
+    num_back_into_closed = 0
+
+    turn_left_into_open = [(4, 8), (7, 6)]
+    turn_right_into_open = [(7, 8), (4, 6)]
+    turn_straight_into_open = [(6, 8), (8, 6)]
+    turn_back_into_open = [(6, 6), (8, 8)]
+    turn_left_into_closed = [(8, 7), (6, 4)]
+    turn_right_into_closed = [(8, 4), (6, 7)]
+    turn_straight_into_closed = [(4, 7), (7, 4)]
+    turn_back_into_closed = [(4, 4), (7, 7)]
 
     for i in range(len(entries) - 1):
-        if (entries_dict[entries[i]], entries_dict[entries[i + 1]]) in turn_left:
-            num_left += 1
-        elif (entries_dict[entries[i]], entries_dict[entries[i + 1]]) in turn_right:
-            num_right += 1
-        elif (entries_dict[entries[i]], entries_dict[entries[i + 1]]) in go_straight:
-            num_straight += 1
-        elif (entries_dict[entries[i]], entries_dict[entries[i + 1]]) in go_back:
-            num_back += 1
+        turn = (entries_dict[entries[i]], entries_dict[entries[i + 1]])
+        if turn in turn_left_into_open:
+            num_left_into_open += 1
+        elif turn in turn_right_into_open:
+            num_right_into_open += 1
+        elif turn in turn_straight_into_open:
+            num_straight_into_open += 1
+        elif turn in turn_back_into_open:
+            num_back_into_open += 1
+        elif turn in turn_left_into_closed:
+            num_left_into_closed += 1
+        elif turn in turn_right_into_closed:
+            num_right_into_closed += 1
+        elif turn in turn_straight_into_closed:
+            num_straight_into_closed += 1
+        elif turn in turn_back_into_closed:
+            num_back_into_closed += 1
 
-    num_turns_total = num_right + num_back + num_left + num_straight
-    return {
-        'num_left': num_left,
-        'num_right': num_right,
-        'num_straight': num_straight,
-        'num_back': num_back,
-        'percent_right_turns': num_right / num_turns_total,
-        'percent_left_turns': num_left / num_turns_total,
-        'percent_straight_turns': num_straight / num_turns_total,
-        'percent_back_turns': num_back / num_turns_total,
-        'right_over_right_and_left': num_right / (num_right + num_left),
-        'left_over_right_and_left': num_left / (num_right + num_left),
-        'num_turns_total': num_turns_total
-    }
+    num_left = num_left_into_open + num_left_into_closed
+    num_right = num_right_into_open + num_right_into_closed
+    num_straight = num_straight_into_open + num_straight_into_closed
+    num_back = num_back_into_open + num_back_into_closed
+
+    num_total = num_right + num_back + num_left + num_straight
+    num_total_into_open = num_left_into_open + num_right_into_open + num_straight_into_open + num_back_into_open
+    num_total_into_closed = num_left_into_closed + num_right_into_closed + num_straight_into_closed + num_back_into_closed
+
+    turningFeatures = {}
+    # 'num_left': num_left,
+    # 'num_right': num_right,
+    # 'num_straight': num_straight,
+    # 'num_back': num_back,
+    turningFeatures['num_total'] = num_total
+    turningFeatures['num_total_into_open'] = num_total_into_open
+    turningFeatures['num_total_into_closed'] = num_total_into_closed
+    if num_total != 0:
+        turningFeatures['fraction_right'] = float(num_right) / num_total
+        turningFeatures['fraction_left'] = float(num_left) / num_total
+        turningFeatures['fraction_straight'] = float(num_straight) / num_total
+        turningFeatures['fraction_back'] = float(num_back) / num_total
+    if (num_right + num_left) != 0:
+        turningFeatures['fraction_right_only_right_left'] = float(num_right) / (num_right + num_left)
+        turningFeatures['fraction_left_only_right_left'] = float(num_left) / (num_right + num_left)
+    if (num_straight + num_back) != 0:
+        turningFeatures['fraction_straight_only_straight_back'] = float(num_straight) / (num_straight + num_back)
+        turningFeatures['fraction_back_only_straight_back'] = float(num_back) / (num_straight + num_back)
+    if num_total_into_open != 0:
+        turningFeatures['fraction_right_into_open'] = float(num_right_into_open) / num_total_into_open
+        turningFeatures['fraction_left_into_open'] = float(num_left_into_open) / num_total_into_open
+        turningFeatures['fraction_straight_into_open'] = float(num_straight_into_open) / num_total_into_open
+        turningFeatures['fraction_back_into_open'] = float(num_back_into_open) / num_total_into_open
+    if num_total_into_closed != 0:
+        turningFeatures['fraction_right_into_closed'] = float(num_right_into_closed) / num_total_into_closed
+        turningFeatures['fraction_left_into_closed'] = float(num_left_into_closed) / num_total_into_closed
+        turningFeatures['fraction_straight_into_closed'] = float(num_straight_into_closed) / num_total_into_closed
+        turningFeatures['fraction_back_into_closed'] = float(num_back_into_closed) / num_total_into_closed
+    if (num_right_into_open + num_left_into_open) != 0:
+        turningFeatures['fraction_right_only_right_left_into_open'] = float(num_right_into_open) / (
+                num_right_into_open + num_left_into_open)
+        turningFeatures['fraction_left_only_right_left_into_open'] = float(num_right_into_open) / (
+                num_right_into_open + num_left_into_open)
+    if (num_straight_into_open + num_back_into_open) != 0:
+        turningFeatures['fraction_straight_only_straight_back_into_open'] = float(num_straight_into_open) / (
+                num_straight_into_open + num_back_into_open)
+        turningFeatures['fraction_back_only_straight_back_into_open'] = float(num_back_into_open) / (
+                num_straight_into_open + num_back_into_open)
+    if (num_right_into_closed + num_left_into_closed) != 0:
+        turningFeatures['fraction_right_only_right_left_into_closed'] = float(num_right_into_closed) / (
+                num_right_into_closed + num_left_into_closed)
+        turningFeatures['fraction_left_only_right_left_into_closed'] = float(num_left_into_closed) / (
+                num_right_into_closed + num_left_into_closed)
+    if (num_straight_into_closed + num_back_into_closed) != 0:
+        turningFeatures['fraction_straight_only_straight_back_into_closed'] = float(num_straight_into_closed) / (
+                num_straight_into_closed + num_back_into_closed)
+        turningFeatures['fraction_back_only_straight_back_into_closed'] = float(num_back_into_closed) / (
+                num_straight_into_closed + num_back_into_closed)
+
+    return turningFeatures
 
 
-def calculatePeekingTimes(arm_entries, threshold=150):
+def calculateBacktrackCounts(arm_entries, threshold=150):
     # if a mouse leaves an arm then goes back without entering any other arm in
     # a threshold of frames(e.g., threshold = 150(5 seconds))
     # then count it as one time of peeking
@@ -576,7 +722,21 @@ def calculatePeekingTimes(arm_entries, threshold=150):
         if entries[k + 1] - entries[k] < threshold and entries_dict[entries[k]] == entries_dict[entries[k + 1]]:
             times[entries_dict[entries[k]]] += 1
 
-    return times
+    numBacktracksByArm = {}
+    totalPeeksOpen = 0
+    totalPeeksClosed = 0
+    for arm in arms:
+        armName = ARM_ORDER[arm]
+        numBacktracksByArm[armName] = times[arm]
+        if armName in OPEN_ARMS:
+            totalPeeksOpen += times[arm]
+        elif armName in CLOSED_ARMS:
+            totalPeeksClosed += times[arm]
+    numBacktracksByArm['total_open'] = totalPeeksOpen
+    numBacktracksByArm['total_closed'] = totalPeeksClosed
+    numBacktracksByArm['total'] = totalPeeksOpen + totalPeeksClosed
+
+    return numBacktracksByArm
 
 
 def RegionToRegionFreq(arm_entries):
@@ -594,6 +754,56 @@ def RegionToRegionFreq(arm_entries):
                     freq[(arms[i], arms[j])] += 1
 
     return dict(freq)
+
+
+def calculateMouseSize(boundaries):
+    mouseLengthOverTime = []
+    for boundaryPoints in boundaries:
+        boundaryPoints = boundaryPoints[0]
+        if boundaryPoints:
+            xMax, xMin, yMax, yMin = findBoundaryBox(boundaryPoints)
+            mouseWidth = xMax - xMin
+            mouseHeight = yMax - yMin
+            mouseLength = max(mouseWidth, mouseHeight)
+            mouseLengthOverTime.append(mouseLength)
+
+    # This is for analysis to figure out which percentile to use
+    makeHistogram(mouseLengthOverTime, 'MouseLength', percentiles=[50, 75, 90])
+
+    # We estimate the length of the mouse to be the 90th percentile of measurements we took
+    mouseLength = np.percentile(mouseLengthOverTime, 90)  # TODO: Figure out which percentile to use
+    return mouseLength
+
+
+def findBoundaryBox(boundaryPoints):
+    xMin = boundaryPoints[0][0]
+    xMax = boundaryPoints[0][0]
+    yMin = boundaryPoints[0][1]
+    yMax = boundaryPoints[0][1]
+    for point in boundaryPoints:
+        x = point[0]
+        y = point[1]
+        if x < xMin:
+            xMin = x
+        elif x > xMax:
+            xMax = x
+        if y < yMin:
+            yMin = y
+        elif y > yMax:
+            yMax = y
+    return xMax, xMin, yMax, yMin
+
+
+def extractMouseFeatures(outer_directory):
+    mouse_char = outer_directory.split('/')[0].split('_')
+    return {
+        'date': mouse_char[0],
+        'time': mouse_char[1],
+        'EPM': mouse_char[2],
+        'strain': mouse_char[3],
+        'mouseID': mouse_char[4],
+        'sex': mouse_char[5] if len(mouse_char) > 5 else ''
+    }
 
 
 def makeHistogram(dataList, title='Hist', verticalLines=[], percentiles=[]):
@@ -620,56 +830,3 @@ def makeHistogram(dataList, title='Hist', verticalLines=[], percentiles=[]):
     # with open('mouseSizes.csv', 'wb') as myfile:
     #     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
     #     wr.writerow(mouseSizeOverTime)
-
-
-def calculateMouseSize(filled_in_mice_ols):
-    # mouseSizeOverTime = []
-    # mouseWidthOverTime = []
-    # mouseHeightOverTime = []
-    mouseLengthOverTime = []
-    for boundaryBox in filled_in_mice_ols:
-        xMin = 1000
-        xMax = -1
-        yMin = 1000
-        yMax = -1
-        for point in boundaryBox[0]:
-            x = point[0]
-            y = point[1]
-            if x < xMin:
-                xMin = x
-            elif x > xMax:
-                xMax = x
-            if y < yMin:
-                yMin = y
-            elif y > yMax:
-                yMax = y
-        mouseWidth = xMax - xMin
-        mouseHeight = yMax - yMin
-        # mouseSize = mouseWidth * mouseHeight
-        mouseLength = max(mouseWidth, mouseHeight)
-        # mouseHeightOverTime.append(mouseHeight)
-        # mouseWidthOverTime.append(mouseWidth)
-        # mouseSizeOverTime.append(mouseSize)
-        mouseLengthOverTime.append(mouseLength)
-
-    # makeHistogram(mouseWidthOverTime, 'MouseWidth')
-    # makeHistogram(mouseHeightOverTime, 'MouseHeight')
-    # makeHistogram(mouseSizeOverTime, 'MouseSize')
-    makeHistogram(mouseLengthOverTime, 'MouseLength', percentiles=[50, 75, 90])
-    # mouseWidth = np.percentile(mouseWidthOverTime, 90)
-    # mouseHeight = np.percentile(mouseHeightOverTime, 90)
-    mouseLength = np.percentile(mouseLengthOverTime, 90)  # TODO: Fix this
-    # mouseSize = np.percentile(mouseSizeOverTime, 90)
-    return mouseLength
-
-
-def extractMouseFeatures(outer_directory):
-    mouse_char = outer_directory.split('/')[0].split('_')
-    return {
-        'date': mouse_char[0],
-        'time': mouse_char[1],
-        'EPM': mouse_char[2],
-        'strain': mouse_char[3],
-        'mouseID': mouse_char[4],
-        'sex': mouse_char[5] if len(mouse_char) > 5 else ''
-    }

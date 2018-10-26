@@ -44,17 +44,17 @@ def process_directory(parentDirectory, mouseDirectory):
     conditions_folder_path, innerDirectory = extractContentDirectory(mouseDirectory, parentDirectory)
     mouseFeatures = extractMouseFeatures(mouseDirectory)
 
-    print('Finding boundaries over time')
+    print('Finding positions over time')
     start_frame, end_frame = getStartEndFrames()
     boundaries, zones_masks, shape = load_data(conditions_folder_path, start_frame, end_frame)
     boundaries, results_array, zones_order = cleanBoundaries(boundaries, shape, zones_masks)
+    centroids = calculateCentroids(boundaries, shape)
+    centroidsByArm = calculateCentroidsByArm(centroids, zones_order, results_array)
 
     print('Finding arm entry features')
-    frac_in_arms, tot_arm_entries, frames_in_arms, arm_entries = calculateArmEntries(
+    fraction_in_arms, totalArmEntries, frames_in_arms, arm_entries = calculateArmEntries(
         zones_order, results_array, start_frame, end_frame, conditions_folder_path
     )
-    centroids = calculateCentroids(boundaries, shape)
-    centroidsByArm = calcPosition(centroids, zones_order, results_array)
     turningPreferences = calculateTurningPreference(arm_entries)
 
     print('Finding mouse size')
@@ -65,25 +65,28 @@ def process_directory(parentDirectory, mouseDirectory):
     velocity_features = calculateVelocityFeatures(distancesPerArm, directionsPerArm)
 
     print('Finding miscellaneous features')
-    restFractionPerArm = calculateRest(distancesPerArm)
-    safetyFractionsPerArm = calculateSafety(centroidsByArm, mouseLength)
-    safetyAndRestFractionsPerArm = calculateSafetyAndRest(centroidsByArm, distancesPerArm, mouseLength)
+    restFractionPerArm = calculateRestFeatures(distancesPerArm)
+    safetyFractionsPerArm = calculateSafetyFeatures(centroidsByArm, mouseLength)
+    safetyAndRestFractionsPerArm = calculateSafeAndRestingFeatures(centroidsByArm, distancesPerArm, mouseLength)
+    peakingFeatures = calculatePeekingFeatures(centroidsByArm, distancesPerArm, mouseLength)
+    backtrackCounts = calculateBacktrackCounts(arm_entries)
 
     print('Results found for {}'.format(mouseDirectory))
     results = {
-        'turning_preferences': turningPreferences,
+        'inner_directory': innerDirectory,
         'mouse_details': mouseFeatures,
         'mouse_length': mouseLength,
-        'inner_directory': innerDirectory,
-        'frac_in_arms': frac_in_arms,
+        'turning_preferences': turningPreferences,
+        'fraction_in_arms': fraction_in_arms,
         'arm_entries': arm_entries,
-        'tot_arm_entries': tot_arm_entries,
+        'tot_arm_entries': totalArmEntries,
         'frames_in_arms': frames_in_arms,
         'total_distance': totalDistancePerArm,
         'velocity': velocity_features,
         'active_fraction': restFractionPerArm,
         'safety_fraction': safetyFractionsPerArm,
         'safety_and_rest_fraction': safetyAndRestFractionsPerArm,
+        'backtrack_counts': backtrackCounts,
     }
     return results
 
