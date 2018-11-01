@@ -498,7 +498,6 @@ def calculateSafeAndRestingFeatures(centroidsByArm, distancesPerArm, mouseLength
         else:  # Mouse never in this arm
             safeAndRestingFeatures[arm] = 0
 
-
     if timeTotal != 0:
         safeAndRestingFeatures['closed_arms'] = timeSafeAndRestTotal / float(timeTotal)
     return safeAndRestingFeatures
@@ -541,7 +540,19 @@ def smoothDistancesByArm(distancesPerArm):
 
 
 def calculateTotalDistancePerArm(distancesPerArm):
-    return {k: np.sum(v) for k, v in distancesPerArm.items()}
+    totalDistancePerArm = {k: np.sum(v) for k, v in distancesPerArm.items()}
+
+    closeArmsTotal = 0
+    for arm in CLOSED_ARMS:
+        closeArmsTotal += totalDistancePerArm[arm]
+    totalDistancePerArm["closed"] = closeArmsTotal
+
+    openArmsTotal = 0
+    for arm in OPEN_ARMS:
+        openArmsTotal += totalDistancePerArm[arm]
+    totalDistancePerArm["open"] = openArmsTotal
+
+    return totalDistancePerArm
 
 
 def calculateDistancesByArm(centroidsByArm):
@@ -608,17 +619,25 @@ def smooth(x, window_len=10, window='flat'):
 
 
 def calculateArmEntries(zones_order, results_array, start_frame, end_frame, conditions_folder):
-    tot = float(sum([a.sum() for a in results_array[start_frame:end_frame].transpose()]))
-    # pixels_in_zones can assign 'residence time' to multiple zones if mouse is in multiple zones at a time
-    pixels_in_zones = dict(zip(zones_order, [a.sum() / tot for a in results_array[start_frame:end_frame].transpose()]))
-    fraction_in_openArms = pixels_in_zones['OB'] + pixels_in_zones['OT']
-    fraction_in_closedArms = pixels_in_zones['CL'] + pixels_in_zones['CR']
-    fraction_in_middle = pixels_in_zones['M']
+    # pixelsInZones can assign 'residence time' to multiple zones if mouse is in multiple zones at a time
+    pixelsInZones = dict(zip(zones_order, [a.sum() for a in results_array[start_frame:end_frame].transpose()]))
+
+    total = 0.
+    for arm in GOOD_ARMS:
+        total += pixelsInZones[arm]
+
+    fractionInZones = {}
+    for arm in GOOD_ARMS:
+        fractionInZones[arm] = pixelsInZones[arm] / total
+
+    fraction_in_openArms = fractionInZones['OB'] + fractionInZones['OT']
+    fraction_in_closedArms = fractionInZones['CL'] + fractionInZones['CR']
+    fraction_in_middle = fractionInZones['M']
     fraction_in_closedAndMiddle = fraction_in_closedArms + fraction_in_middle
-    fraction_in_left = pixels_in_zones['CL']
-    fraction_in_right = pixels_in_zones['CR']
-    fraction_in_top = pixels_in_zones['OT']
-    fraction_in_bottom = pixels_in_zones['OB']
+    fraction_in_left = fractionInZones['CL']
+    fraction_in_right = fractionInZones['CR']
+    fraction_in_top = fractionInZones['OT']
+    fraction_in_bottom = fractionInZones['OB']
     fraction_in_arms = {
         'open-arms': fraction_in_openArms,
         'closed': fraction_in_closedArms,
@@ -879,7 +898,7 @@ def makeHistogram(dataList, title='Hist', verticalLines=[], percentiles=[]):
         percentileLine = plt.axvline(x=percentileValue, color='k', linestyle='dashed', linewidth=1)
         percentileLines.append(percentileLine)
         # if 'Speed' in title:
-            # print('{} : Percentile: {}, value: {}'.format(title, percentile, percentileValue))
+        # print('{} : Percentile: {}, value: {}'.format(title, percentile, percentileValue))
 
     for verticalLine in verticalLines:
         plt.axvline(x=verticalLine, color='red', linestyle='dashed', linewidth=1)
