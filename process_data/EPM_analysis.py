@@ -461,7 +461,7 @@ def calculatePeekingFeatures(centroidsByArm, distancesPerArm, mouseLength):
         else:  # Mouse never in this arm
             peekingFeatures['fraction_{}'.format(arm)] = None
 
-    peekingFeatures['count_total'] = len(peekLengths)
+    peekingFeatures['count_total'] = len(peekLengthsTotal)
     if timeTotal != 0:
         peekingFeatures['fraction_total'] = timePeekingTotal / float(timeTotal)
     peekingFeatures['average_length_total'] = np.average(peekLengthsTotal) * FPS
@@ -878,8 +878,8 @@ def makeHistogram(dataList, title='Hist', verticalLines=[], percentiles=[]):
         percentileValue = np.percentile(dataList, percentile)
         percentileLine = plt.axvline(x=percentileValue, color='k', linestyle='dashed', linewidth=1)
         percentileLines.append(percentileLine)
-        if 'Speed' in title:
-            print('{} : Percentile: {}, value: {}'.format(title, percentile, percentileValue))
+        # if 'Speed' in title:
+            # print('{} : Percentile: {}, value: {}'.format(title, percentile, percentileValue))
 
     for verticalLine in verticalLines:
         plt.axvline(x=verticalLine, color='red', linestyle='dashed', linewidth=1)
