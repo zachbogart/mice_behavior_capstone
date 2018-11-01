@@ -80,7 +80,6 @@ def process_directory(parentDirectory, mouseDirectory):
         'mouse_length': mouseLength,
         'turning_preferences': turningPreferences,
         'fraction_in_arms': fraction_in_arms,
-        'arm_entries': arm_entries,
         'tot_arm_entries': totalArmEntries,
         'frames_in_arms': frames_in_arms,
         'total_distance': totalDistancePerArm,
@@ -161,16 +160,16 @@ def getMouseDirectories():
     return parentDirectory, mouseDirectories
 
 
-def flattenDict(dictionary):
-    result = {}
-    for key in dictionary.keys():
-        if key != 'arm_entries':
-            if isinstance(dictionary[key], dict):
-                for key2 in dictionary[key].keys():
-                    result[key + '_' + key2] = dictionary[key][key2]
+def flattenDict(d):
+    def items():
+        for key, value in d.items():
+            if isinstance(value, dict):
+                for subKey, subValue in flattenDict(value).items():
+                    yield key + "_" + subKey, subValue
             else:
-                result[key] = dictionary[key]
-    return result
+                yield key, value
+
+    return dict(items())
 
 
 def main():
