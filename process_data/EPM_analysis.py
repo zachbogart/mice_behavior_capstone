@@ -12,7 +12,7 @@ CLOSED_ARMS = {'CR', 'CL'}
 OPEN_ARMS = {'OT', 'OB'}
 ARM_ORDER = ['F1', 'F2', 'F3', 'F4', 'CL', 'M', 'OB', 'CR', 'OT']
 
-HISTOGRAMS = False  # If this is set to true, we will save histograms for analysis
+TESTING_RUN__SAVE_GRAPHS = False  # If this is set to true, we will save histograms for analysis
 ZONES = None
 MOUSE_DIRECTORY = None
 
@@ -22,8 +22,8 @@ FPS = 30.083
 
 
 def turnOnHistograms():
-    global HISTOGRAMS
-    HISTOGRAMS = True
+    global TESTING_RUN__SAVE_GRAPHS
+    TESTING_RUN__SAVE_GRAPHS = True
 
 
 def setMouseDirectory(mouseDirectory):
@@ -332,13 +332,14 @@ def calculateSafetyFeatures(centroidsByArm, mouseLength):
 
 
 def distanceFromEndOfArm(arm, point):
+    distanceFromEnd = 0
     if arm == 'CL':
         leftEdgeOfArm = ZONES['CL'][0][0]
-        return point[0] - leftEdgeOfArm
+        distanceFromEnd = point[0] - leftEdgeOfArm
     elif arm == 'CR':
         rightEdgeOfArm = ZONES['CR'][1][0]
-        return rightEdgeOfArm - point[0]
-    return -1
+        distanceFromEnd = rightEdgeOfArm - point[0]
+    return max(distanceFromEnd, 0)
 
 
 def isSafe(arm, mouseLocation, mouseLength):
@@ -393,7 +394,7 @@ def calculateRestFeatures(distancesPerArm):
 
 
 def isResting(speed):
-    threshold = 0.5  # TODO: Figure out what the speed this should be to be considered active
+    threshold = 1  # TODO: Figure out what the speed this should be to be considered active
     return speed < threshold
 
 
@@ -468,22 +469,6 @@ def calculatePeekingFeatures(centroidsByArm, distancesPerArm, mouseLength):
 
     return peekingFeatures
 
-    # TODO: Calculate these
-    # A peek is defined as being at rest and located the side of a closed arm closest to the middle arm.
-    peekingFeatures = {}
-    peekingFeatures['average_peek_time'] = None
-    peekingFeatures['median_peek_time'] = None
-    peekingFeatures['CL_num_peeks'] = None
-    peekingFeatures['CR_num_peeks'] = None
-    peekingFeatures['closed_num_peeks'] = None
-    peekingFeatures['CL_fraction_time_peeking'] = None
-    peekingFeatures['CR_fraction_time_peeking'] = None
-    peekingFeatures['closed_fraction_time_peeking'] = None
-    peekingFeatures['CL_fraction_num_peeks_over_num_closed_to_open_turns'] = None
-    peekingFeatures['CR_fraction_num_peeks_over_num_closed_to_open_turns'] = None
-    peekingFeatures['closed_fraction_num_peeks_over_num_closed_to_open_turns'] = None
-    pass
-
 
 def isRestingAndSafe(speed, arm, mouseLocation, mouseLength):
     safe = isSafe(arm, mouseLocation, mouseLength)
@@ -517,6 +502,28 @@ def calculateSafeAndRestingFeatures(centroidsByArm, distancesPerArm, mouseLength
     if timeTotal != 0:
         safeAndRestingFeatures['closed_arms'] = timeSafeAndRestTotal / float(timeTotal)
     return safeAndRestingFeatures
+
+
+def testDistance(centroids):
+    if not TESTING_RUN__SAVE_GRAPHS:
+        return
+
+    distances = []
+    directions = []
+
+    for frame in range(len(centroids) - 1):
+        point1 = centroids[frame]
+        point2 = centroids[frame + 1]
+        vectorLength, vectorDirection = calculateVectorStatistics(point1, point2)
+
+        distances.append(vectorLength)
+        directions.append(vectorDirection)
+
+    distances = np.array(distances)
+    distancesSmoothed = smooth(np.array(distances))
+    lineListWithLabels = [(distancesSmoothed, "Smoothed Speed")]
+    makeLineGraph(lineListWithLabels, title="Speed Over Time", xLabel="Seconds", yLabel="Speed")
+    # print('done')
 
 
 def calculateDistanceFeatures(centroidsByArm):
@@ -862,22 +869,44 @@ def extractMouseFeatures(outer_directory):
 
 
 def makeHistogram(dataList, title='Hist', verticalLines=[], percentiles=[]):
-    if not HISTOGRAMS:
+    if not TESTING_RUN__SAVE_GRAPHS:
         return
-    fig = plt.figure(figsize=(40, 20))
+    fig = plt.figure(figsize=(20, 10))
 
+    percentileLines = []
     for percentile in percentiles:
-        percentileLine = np.percentile(dataList, percentile)
-        plt.axvline(x=percentileLine, color='k', linestyle='dashed', linewidth=1)
+        percentileValue = np.percentile(dataList, percentile)
+        percentileLine = plt.axvline(x=percentileValue, color='k', linestyle='dashed', linewidth=1)
+        percentileLines.append(percentileLine)
+        if 'Speed' in title:
+            print('{} : Percentile: {}, value: {}'.format(title, percentile, percentileValue))
 
     for verticalLine in verticalLines:
         plt.axvline(x=verticalLine, color='red', linestyle='dashed', linewidth=1)
 
-    plt.hist(dataList, bins='auto')
+    binwidth = 1.
+
+    if 'Speed' in title:
+        plt.xticks(np.concatenate((np.arange(0., 5., 0.25), np.arange(5., 20., 1.))), rotation=70)
+        plt.xlim(xmin=0., xmax=2.5)
+        binwidth = 0.05
+
+    plt.hist(
+        dataList,
+        bins=np.arange(min(dataList), max(dataList) + binwidth, binwidth),
+        # range=[0., 2.]
+    )
+    # plt.hist(dataList, bins='auto')
     plt.title(title)
     plt.xlabel("Value")
     plt.ylabel("Frequency")
     plt.show()
+
+    ax = plt.axes()
+
+    # _,  plt.subplots()
+    ax.legend(percentileLines, percentiles)
+
     mouseDirectoryPath = 'Basic Data/{}'.format(MOUSE_DIRECTORY)
     if not os.path.isdir(mouseDirectoryPath):
         os.makedirs(mouseDirectoryPath)
@@ -885,6 +914,41 @@ def makeHistogram(dataList, title='Hist', verticalLines=[], percentiles=[]):
     # with open('mouseSizes.csv', 'wb') as myfile:
     #     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
     #     wr.writerow(mouseSizeOverTime)
+
+    plt.close()
+
+
+def makeLineGraph(dataListsWithLabel, title='Line', xLabel="Frames", yLabel="Value"):
+    if not TESTING_RUN__SAVE_GRAPHS:
+        return
+    fig = plt.figure(figsize=(25, 10))
+
+    for dataList, label in dataListsWithLabel:
+        plt.plot(dataList, label=label)
+    plt.title(title)
+    plt.xlabel(xLabel)
+    plt.ylabel(yLabel)
+    # plt.show()
+
+    tickLocationsX = np.arange(0, len(dataListsWithLabel[0][0]), 60)
+    tickLabelsX = map(lambda x: x / 30, tickLocationsX)
+    plt.xticks(tickLocationsX, tickLabelsX, rotation=70)
+
+    tickLocationsY = np.arange(0, max(dataListsWithLabel[0][0]), 1)
+    plt.yticks(tickLocationsY)
+
+    plt.grid(True)
+    plt.legend()
+
+    mouseDirectoryPath = 'Basic Data/{}'.format(MOUSE_DIRECTORY)
+    if not os.path.isdir(mouseDirectoryPath):
+        os.makedirs(mouseDirectoryPath)
+    fig.savefig('{}/{}.png'.format(mouseDirectoryPath, title))
+    # with open('mouseSizes.csv', 'wb') as myfile:
+    #     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+    #     wr.writerow(mouseSizeOverTime)
+
+    plt.close()
 
 
 def saveResults(conditions_folder, results_array, frac_in_arms, arm_entries, tot_arm_entries, frames_in_arms,

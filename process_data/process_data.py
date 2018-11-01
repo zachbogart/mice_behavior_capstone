@@ -29,27 +29,29 @@ def process_directory(parentDirectory, mouseDirectory):
     print('Loading data for {}'.format(mouseDirectory))
 
     # TODO: Remove me  --  Use this to stop at only 1 mouse
-    # turnOnHistograms()
-    # if mouseDirectory not in [
-    #     '20121130_163816_EPM_BWPOF1_784_M',
-    #     '20121121_151056_EPM_BWPOF2_767_F',
-    #     '20121121_160958_EPM_PO_758_F',
-    #     '20121217_165902_EPM_BWPOF1_823_F',
-    #     '20130129_162312_EPM_BW_1368_F',
-    #     '20130213_165903_EPM_BWPOF2_1464_M',
-    #     '20130123_112930_EPM_BWPOF2_1316_M',
-    # ]:
-    #     return {}
+    turnOnHistograms()
+    if mouseDirectory not in [
+        '20121130_163816_EPM_BWPOF1_784_M',
+        '20121121_151056_EPM_BWPOF2_767_F',
+        '20121121_160958_EPM_PO_758_F',
+        '20121217_165902_EPM_BWPOF1_823_F',
+        '20130129_162312_EPM_BW_1368_F',
+        '20130213_165903_EPM_BWPOF2_1464_M',
+        '20130123_112930_EPM_BWPOF2_1316_M',
+    ]:
+        return {}
 
     conditions_folder_path, innerDirectory = extractContentDirectory(mouseDirectory, parentDirectory)
     mouseFeatures = extractMouseFeatures(mouseDirectory)
 
     print('Finding positions over time')
-    start_frame, end_frame = getStartEndFrames()
+    start_frame, end_frame = getStartEndFrames(conditions_folder_path)
     boundaries, zones_masks, shape = load_data(conditions_folder_path, start_frame, end_frame)
     boundaries, results_array, zones_order = cleanBoundaries(boundaries, shape, zones_masks)
     centroids = calculateCentroids(boundaries, shape)
     centroidsByArm = calculateCentroidsByArm(centroids, zones_order, results_array)
+
+    testDistance(centroids)  # Testing only
 
     print('Finding arm entry features')
     fraction_in_arms, totalArmEntries, frames_in_arms, arm_entries = calculateArmEntries(
@@ -105,16 +107,19 @@ def populateDirectoriesToUse():
                 directoriesToUse.add(actualDirectory)
 
 
-def getStartEndFrames():
+def getStartEndFrames(conditions_folder_path):
     start_frame = 0
     end_frame = None
-    # TODO: What is this argument? Do we need to use this?
-    # if len(sys.argv) > 2:
-    #     start_frame = (sys.argv[
-    #         2]) * 30  # Substract 15 because Brant tracking starts tracking videos 15 seconds in. Multiply by 30 fps
-    #     if len(sys.argv) > 3:
-    #         end_frame = (sys.argv[
-    #             3]) * 30  # Substract 15 because Brant tracking starts tracking videos 15 seconds in. Multiply by 30 fps
+
+    # Retrieve timeframe data
+    file_main_dir = os.path.dirname(os.path.dirname(conditions_folder_path))
+    file_path = os.path.join(file_main_dir, os.path.basename(file_main_dir) + '.timeframe.tuple')
+    if os.path.isfile(file_path):
+        with open(file_path, 'r') as f:
+            start_frame, end_frame = eval(f.read())
+            start_frame = start_frame * 30  # Substract 15 because Brant tracking starts tracking videos 15 seconds in. Multiply by 30 fps
+            if end_frame:
+                end_frame = end_frame * 30  # Substract 15 because Brant tracking starts tracking videos 15 seconds in. Multiply by 30 fps
     return start_frame, end_frame
 
 
@@ -175,9 +180,10 @@ def main():
     for mouseDirectory in mouseDirectories:
         try:
             mouseResults = process_directory(parentDirectory, mouseDirectory)
-            flatResults = flattenDict(mouseResults)
-            aggregateResults.append(flatResults)
-        except (NoDataError, IndexError), exception:  # TODO Index Error fix?
+            if mouseResults:
+                flatResults = flattenDict(mouseResults)
+                aggregateResults.append(flatResults)
+        except NoDataError, exception:  # TODO Index Error fix?
             print('Exception: {}'.format(exception))
     # saveResultsAsJson(aggregateResults)
     saveResultsAsCSV(aggregateResults)
