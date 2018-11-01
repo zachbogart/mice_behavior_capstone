@@ -208,7 +208,10 @@ def calculateCentroids(filled_in_mice_ols, shape):
             largest_ol = fr[np.argmax(ol_size)]
             ol = largest_ol
         else:
-            ol = fr[0]
+            if fr:
+                ol = fr[0]
+            else:
+                ol = []
         centroids.append(vidtools.centroid(ol, shape, cm))
 
     # centroidDF = pd.DataFrame(centroids)
@@ -323,7 +326,8 @@ def calculateSafetyFeatures(centroidsByArm, mouseLength):
         makeHistogram(distancesFromEndOfArm, title='Distances From Safety in arm {}'.format(arm),
                       verticalLines=[mouseLength], percentiles=[])
 
-    safetyFeatures['closed_arms'] = timeSafetyTotal / float(timeTotal)
+    if timeTotal != 0:
+        safetyFeatures['closed_arms'] = timeSafetyTotal / float(timeTotal)
     return safetyFeatures
 
 
@@ -377,10 +381,14 @@ def calculateRestFeatures(distancesPerArm):
         # For analysis we graph the speeds of the mouse to see where cutoff should be for 'at rest'
         makeHistogram(distances, title='Speeds in arm {}'.format(arm), percentiles=[10, 25, 50])
 
-    restFeatures['open_arms'] = timeRestTotalOpen / float(timeTotalOpen)
-    restFeatures['closed_arms'] = timeRestTotalClosed / float(timeTotalClosed)
-    restFeatures['all_arms'] = (timeRestTotalOpen + timeRestTotalClosed + timeRestTotalMiddle) / \
-                               float(timeTotalClosed + timeTotalOpen + timeTotalMiddle)
+    if timeTotalOpen != 0:
+        restFeatures['open_arms'] = timeRestTotalOpen / float(timeTotalOpen)
+    if timeTotalClosed != 0:
+        restFeatures['closed_arms'] = timeRestTotalClosed / float(timeTotalClosed)
+    totalTime = timeTotalClosed + timeTotalOpen + timeTotalMiddle
+    if totalTime != 0:
+        restFeatures['all_arms'] = (timeRestTotalOpen + timeRestTotalClosed + timeRestTotalMiddle) / \
+                                   float(totalTime)
     return restFeatures
 
 
@@ -453,7 +461,8 @@ def calculatePeekingFeatures(centroidsByArm, distancesPerArm, mouseLength):
             peekingFeatures['fraction_{}'.format(arm)] = None
 
     peekingFeatures['count_total'] = len(peekLengths)
-    peekingFeatures['fraction_total'] = timePeekingTotal / float(timeTotal)
+    if timeTotal != 0:
+        peekingFeatures['fraction_total'] = timePeekingTotal / float(timeTotal)
     peekingFeatures['average_length_total'] = np.average(peekLengthsTotal) * FPS
     peekingFeatures['median_length_total'] = np.median(peekLengthsTotal) * FPS
 
@@ -504,7 +513,9 @@ def calculateSafeAndRestingFeatures(centroidsByArm, distancesPerArm, mouseLength
         else:  # Mouse never in this arm
             safeAndRestingFeatures[arm] = 0
 
-    safeAndRestingFeatures['closed_arms'] = timeSafeAndRestTotal / float(timeTotal)
+
+    if timeTotal != 0:
+        safeAndRestingFeatures['closed_arms'] = timeSafeAndRestTotal / float(timeTotal)
     return safeAndRestingFeatures
 
 
@@ -534,10 +545,11 @@ def calculateDistancesByArm(centroidsByArm):
             for frame in range(len(arc) - 1):
                 point1 = arc[frame]
                 point2 = arc[frame + 1]
-                vectorLength, vectorDirection = calculateVectorStatistics(point1, point2)
+                if point1 and point2:
+                    vectorLength, vectorDirection = calculateVectorStatistics(point1, point2)
 
-                distancesPerArm[arm].append(vectorLength)
-                directionsPerArm[arm].append(vectorDirection)
+                    distancesPerArm[arm].append(vectorLength)
+                    directionsPerArm[arm].append(vectorDirection)
     return distancesPerArm, directionsPerArm
 
 
@@ -800,8 +812,8 @@ def RegionToRegionFreq(arm_entries):
 def calculateMouseSize(boundaries):
     mouseLengthOverTime = []
     for boundaryPoints in boundaries:
-        boundaryPoints = boundaryPoints[0]
         if boundaryPoints:
+            boundaryPoints = boundaryPoints[0]
             xMax, xMin, yMax, yMin = findBoundaryBox(boundaryPoints)
             mouseWidth = xMax - xMin
             mouseHeight = yMax - yMin
@@ -812,6 +824,8 @@ def calculateMouseSize(boundaries):
     makeHistogram(mouseLengthOverTime, 'MouseLength', percentiles=[50, 75, 90])
 
     # We estimate the length of the mouse to be the 90th percentile of measurements we took
+    if not mouseLengthOverTime:
+        return 0
     mouseLength = np.percentile(mouseLengthOverTime, 90)  # TODO: Figure out which percentile to use
     return mouseLength
 
