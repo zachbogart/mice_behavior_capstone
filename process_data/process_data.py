@@ -84,7 +84,7 @@ def process_directory(parentDirectory, mouseDirectory):
         'frames_in_arms': frames_in_arms,
         'total_distance': totalDistancePerArm,
         'velocity': velocity_features,
-        'active_fraction': restFractionPerArm,
+        'rest_fraction': restFractionPerArm,
         'safety_fraction': safetyFractionsPerArm,
         'safety_and_rest_fraction': safetyAndRestFractionsPerArm,
         'peeking': peakingFeatures,
