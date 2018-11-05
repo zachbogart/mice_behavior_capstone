@@ -1,0 +1,78 @@
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(grid)
+library(gridExtra)
+```
+
+```{r}
+setwd("~/Desktop/mice_behavior_capstone/process_data/results")
+df <- read.csv('all_the_data.csv')
+df$count  = 1 
+
+df <- df %>% filter(mouse_details_sex %in% c('F', 'M')) %>%
+             mutate(gender = if_else(mouse_details_sex == 'F', 'Female', 'Male'))
+
+df$mouse_details_strain <- factor(df$mouse_details_strain, levels = c('BW', 'PO', 'BWPOF1', 'BWPOF2'))
+```
+
+```{r}
+col_names = colnames(df[c(6:220)])
+```
+
+
+```{r}
+df2 <- df %>% filter(mouse_details_strain %in% c('BW', 'PO'))
+
+var = 'fraction_in_arms_closed_and_middle'
+
+dodge <- position_dodge(width = .9)
+ggplot(df2, aes_string(x = 'mouse_details_strain', y= var, color = 'gender')) + 
+        geom_violin() + 
+        geom_point(alpha = .3, position = position_jitterdodge(), width  = .1 ) +
+        geom_boxplot(width=0.1,  outlier.colour=NA, position = dodge) +
+        theme_minimal() + 
+        xlab("Strain") + 
+        ylab(var) +
+        theme(plot.title = element_text(hjust = 0.5))
+#ggsave('plots/boxplt_closedAndMid.pdf')
+```
+
+
+
+
+
+```{r}
+vio_plot <- function(var){
+  
+  dodge <- position_dodge(width = .9)
+  p<- ggplot(df2, aes_string(x = 'mouse_details_strain', y= var, color = 'gender')) + 
+          geom_violin() + 
+          geom_point(alpha = .3, position = position_jitterdodge(), width  = .1 ) +
+          geom_boxplot(width=0.1,  outlier.colour=NA, position = dodge) +
+          theme_minimal() + 
+          xlab("Strain") + 
+          ylab(var) +
+          theme(plot.title = element_text(hjust = 0.5))
+  
+  print(p)
+  ggsave(paste('violin_plots/',var, '.pdf',sep = ''))
+  
+}
+```
+
+
+```{r}
+cols <- Filter(function(x) !any(grepl("mouse_details", x)), colnames(df))               
+rem <- c("X", "inner_directory", "count", "gender")
+cols <- cols[which(!cols %in% rem)]
+```
+
+```{r}
+for(i in cols){
+  vio_plot(i)
+}
+```
+
