@@ -80,6 +80,31 @@ for(i in cols){
 }
 ```
 
+
+```{r}
+do_t_tests <- function(var){
+  df3 <- df %>% filter(mouse_details_strain %in% c('BW', 'PO'))
+  
+  df3 <- df3 %>%
+    select(var, mouse_details_strain) %>%
+    filter(!is.na(df3[, var]))
+  
+  df3[, var] <- as.numeric(as.character(df3[, var]))
+  
+  print(var)
+  
+  # ggsave(paste('violin_plots/',var, '.pdf',sep = ''))
+  # t.test( ~ mouse_details_strain, data = df2)
+  print(t.test(df3[, var] ~ df3[, 'mouse_details_strain']))
+}
+```
+
+```{r}
+for(i in cols){
+  do_t_tests(i)
+}
+```
+
 ```{r}
 df3 <- df %>% filter(mouse_details_strain %in% c('BW', 'PO'))
   is.na(df3) <- df3==''
@@ -88,41 +113,7 @@ df3 <- df3 %>%
   select(active_fraction_CL, mouse_details_strain) %>%
   filter(!is.na(df3[, 'active_fraction_CL']))
 
+df3$active_fraction_CL <- as.numeric(as.character(df3$active_fraction_CL))
+
+t.test(df3[, 'active_fraction_CL'] ~ df3[, 'mouse_details_strain'])
 ```
-
-
-```{r}
-vio_plot2 <- function(var){
-  df3 <- df %>% filter(mouse_details_strain %in% c('BW', 'PO'))
-  is.na(df3) <- df3==''
-  
-  df3 <- df3 %>%
-    select(var, mouse_details_strain) %>%
-    filter(!is.na(df3[, var]))
-  
-  p <- position_dodge(width = .9)
-ggplot(df2, aes_string(x = 'mouse_details_strain', y= var, color = 'gender')) + 
-        geom_violin() + 
-        geom_point(alpha = .3, position = position_jitterdodge(jitter.width = 0.1, dodge.width = 0.9), width  = .1 ) +
-        geom_boxplot(width=0.1,  outlier.colour=NA, position = dodge) +
-        theme_minimal() + 
-        xlab("Strain") + 
-        ylab(var) +
-        theme(plot.title = element_text(hjust = 0.5))
-  
-  print(p)
-  
-  # ggsave(paste('violin_plots/',var, '.pdf',sep = ''))
-  # t.test( ~ mouse_details_strain, data = df2)
-  t.test(df3[, var] ~ df3[, 'mouse_details_strain'])
-}
-```
-
-```{r}
-# for(i in cols){
-#   print(i)
-#   vio_plot2(i)
-# }fraction_in_arms_closed_and_middle
-vio_plot2('fraction_in_arms_closed_and_middle')
-```
-
