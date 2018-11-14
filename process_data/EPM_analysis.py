@@ -176,7 +176,6 @@ def calculateCentroidsByArm(centroids, zones_order, results_array):
     Finds the position of the largest outline in each frame
     """
 
-    # TODO: Right now we ignore arcs that go from one arm to another
     # Split centroids into arcs of consecutive presence in an arm
     # Make dictionary that will hold the position of the mice
 
@@ -394,7 +393,7 @@ def calculateRestFeatures(distancesPerArm):
 
 
 def isResting(speed):
-    threshold = 1  # TODO: Figure out what the speed this should be to be considered active
+    threshold = 1
     return speed < threshold
 
 
@@ -673,7 +672,7 @@ def calculateArmEntries(zones_order, results_array, start_frame, end_frame, cond
     # xlabel('minutes')
     # ylabel('number of mouse pixels')
     # savefig
-    # savefig(conditions_folder + '/arm_residence_entries.pdf') # TODO: Why are we saving this?
+    # savefig(conditions_folder + '/arm_residence_entries.pdf')
     # close(1)
 
     return fraction_in_arms, tot_arm_entries, frames_in_arms, arm_entries  # ,xplor_frac
@@ -835,7 +834,7 @@ def RegionToRegionFreq(arm_entries):
     return dict(freq)
 
 
-def calculateMouseSize(boundaries):
+def calculateMouseLength(boundaries):
     mouseLengthOverTime = []
     for boundaryPoints in boundaries:
         if boundaryPoints:
@@ -852,7 +851,7 @@ def calculateMouseSize(boundaries):
     # We estimate the length of the mouse to be the 90th percentile of measurements we took
     if not mouseLengthOverTime:
         return 0
-    mouseLength = np.percentile(mouseLengthOverTime, 90)  # TODO: Figure out which percentile to use
+    mouseLength = np.percentile(mouseLengthOverTime, 90)
     return mouseLength
 
 

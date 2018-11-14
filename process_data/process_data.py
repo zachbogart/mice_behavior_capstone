@@ -28,17 +28,19 @@ def process_directory(parentDirectory, mouseDirectory):
     print('')
     print('Loading data for {}'.format(mouseDirectory))
 
-    # TODO: Remove me  --  Use this to stop at only 1 mouse
-    turnOnHistograms()
-    if mouseDirectory not in [
-        '20121130_163816_EPM_BWPOF1_784_M',
-        '20121121_151056_EPM_BWPOF2_767_F',
-        '20121121_160958_EPM_PO_758_F',
-        '20121217_165902_EPM_BWPOF1_823_F',
-        '20130129_162312_EPM_BW_1368_F',
-        '20130213_165903_EPM_BWPOF2_1464_M',
-        '20130123_112930_EPM_BWPOF2_1316_M',
-    ]:
+    # # TODO: Remove me  --  Use this to stop at only 1 mouse
+    # turnOnHistograms()
+    # if mouseDirectory not in [
+    #     '20121130_163816_EPM_BWPOF1_784_M',
+    #     '20121121_151056_EPM_BWPOF2_767_F',
+    #     '20121121_160958_EPM_PO_758_F',
+    #     '20121217_165902_EPM_BWPOF1_823_F',
+    #     '20130129_162312_EPM_BW_1368_F',
+    #     '20130213_165903_EPM_BWPOF2_1464_M',
+    #     '20130123_112930_EPM_BWPOF2_1316_M',
+    # ]:
+    #     return {}
+    if "_PO_" not in mouseDirectory:
         return {}
 
     conditions_folder_path, innerDirectory = extractContentDirectory(mouseDirectory, parentDirectory)
@@ -51,6 +53,8 @@ def process_directory(parentDirectory, mouseDirectory):
     centroids = calculateCentroids(boundaries, shape)
     centroidsByArm = calculateCentroidsByArm(centroids, zones_order, results_array)
 
+    if not boundaries:  # If we have no tracking data, stop now
+        return {}
     testDistance(centroids)  # Testing only
 
     print('Finding arm entry features')
@@ -60,7 +64,7 @@ def process_directory(parentDirectory, mouseDirectory):
     turningPreferences = calculateTurningPreference(arm_entries)
 
     print('Finding mouse size')
-    mouseLength = calculateMouseSize(boundaries)
+    mouseLength = calculateMouseLength(boundaries)
 
     print('Finding velocity features')
     distancesPerArm, directionsPerArm, totalDistancePerArm = calculateDistanceFeatures(centroidsByArm)
