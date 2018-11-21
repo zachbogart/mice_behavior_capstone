@@ -404,6 +404,8 @@ def isPeeking(arm, mouseLocation, mouseLength):
     elif arm == 'CR':
         leftEndOfArm = ZONES['CR'][0][0]
         return mouseLocation[0] < leftEndOfArm + mouseLength
+    elif arm == 'M':
+        return True
     return False
 
 
