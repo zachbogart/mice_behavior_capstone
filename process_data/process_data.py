@@ -40,8 +40,8 @@ def process_directory(parentDirectory, mouseDirectory):
     #     '20130123_112930_EPM_BWPOF2_1316_M',
     # ]:
     #     return {}
-    if "_PO_" not in mouseDirectory:
-        return {}
+    # if "_PO_" not in mouseDirectory:
+    #     return {}
 
     conditions_folder_path, innerDirectory = extractContentDirectory(mouseDirectory, parentDirectory)
     mouseFeatures = extractMouseFeatures(mouseDirectory)
@@ -64,7 +64,8 @@ def process_directory(parentDirectory, mouseDirectory):
     turningPreferences = calculateTurningPreference(arm_entries)
 
     print('Finding mouse size')
-    mouseLength = calculateMouseLength(boundaries)
+    mouseSizeFeatures = calculateMouseLength(boundaries)
+    mouseLength = mouseSizeFeatures['mouseLength']
 
     print('Finding velocity features')
     distancesPerArm, directionsPerArm, totalDistancePerArm = calculateDistanceFeatures(centroidsByArm)
@@ -81,7 +82,7 @@ def process_directory(parentDirectory, mouseDirectory):
     results = {
         'inner_directory': innerDirectory,
         'mouse_details': mouseFeatures,
-        'mouse_length': mouseLength,
+        'mouse_dimensions': mouseSizeFeatures,
         'turning_preferences': turningPreferences,
         'fraction_in_arms': fraction_in_arms,
         'tot_arm_entries': totalArmEntries,

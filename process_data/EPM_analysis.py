@@ -420,7 +420,7 @@ def calculatePeekingFeatures(centroidsByArm, distancesPerArm, mouseLength):
     timeTotal = 0
     peekLengthsTotal = []
     peekingFeatures = {}
-    for arm in CLOSED_ARMS:
+    for arm in {'CL', 'CR', 'M'}:
         centroids = centroidsByArm[arm][0]
         centroids = centroids[:-1]  # Remove last centroid that doesn't correspond to a distance
         distances = distancesPerArm[arm]
@@ -836,8 +836,20 @@ def RegionToRegionFreq(arm_entries):
     return dict(freq)
 
 
+def calculateAverageOfPercentile(list):
+    # Return the average number between the 85th and 95th percentile
+    percentileLower = 85. / 100
+    percentileUpper = 95. / 100
+
+    sortedList = sort(list)
+    indexLower = int(percentileLower * len(sortedList))
+    indexUpper = int(percentileUpper * len(sortedList))
+    return np.mean(sortedList[indexLower:indexUpper + 1])
+
+
 def calculateMouseLength(boundaries):
     mouseLengthOverTime = []
+    mouseWidthOverTime = []
     for boundaryPoints in boundaries:
         if boundaryPoints:
             boundaryPoints = boundaryPoints[0]
@@ -845,16 +857,27 @@ def calculateMouseLength(boundaries):
             mouseWidth = xMax - xMin
             mouseHeight = yMax - yMin
             mouseLength = max(mouseWidth, mouseHeight)
+            mouseWidth = min(mouseWidth, mouseHeight)
             mouseLengthOverTime.append(mouseLength)
+            mouseWidthOverTime.append(mouseWidth)
 
     # This is for analysis to figure out which percentile to use
     makeHistogram(mouseLengthOverTime, 'MouseLength', percentiles=[50, 75, 90])
 
-    # We estimate the length of the mouse to be the 90th percentile of measurements we took
     if not mouseLengthOverTime:
-        return 0
-    mouseLength = np.percentile(mouseLengthOverTime, 90)
-    return mouseLength
+        return 0, 0, 0
+
+    mouseSizeOverTime = [length * width for length, width in zip(mouseLengthOverTime, mouseWidthOverTime)]
+
+    # We estimate the length of the mouse to be the 90th percentile of measurements we took
+    mouseLength = calculateAverageOfPercentile(mouseLengthOverTime)
+    mouseWidth = calculateAverageOfPercentile(mouseWidthOverTime)
+    mouseSize = calculateAverageOfPercentile(mouseSizeOverTime)
+    return {
+        'mouseLength': mouseLength,
+        'mouseWidth': mouseWidth,
+        'mouseSize': mouseSize
+    }
 
 
 def findBoundaryBox(boundaryPoints):
