@@ -835,12 +835,10 @@ def calculateMouseLength(boundaries):
     if not mouseLengthOverTime:
         return 0, 0, 0
 
-    mouseSizeOverTime = [length * width for length, width in zip(mouseLengthOverTime, mouseWidthOverTime)]
-
     # We estimate the length of the mouse to be the 90th percentile of measurements we took
     mouseLength = calculateAverageOfPercentile(mouseLengthOverTime)
     mouseWidth = calculateAverageOfPercentile(mouseWidthOverTime)
-    mouseSize = calculateAverageOfPercentile(mouseSizeOverTime)
+    mouseSize = mouseLength * mouseWidth
     return {
         'mouseLength': mouseLength,
         'mouseWidth': mouseWidth,

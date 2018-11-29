@@ -78,6 +78,8 @@ def process_directory(parentDirectory, mouseDirectory):
     peakingFeatures = calculatePeekingFeatures(centroidsByArm, distancesPerArm, mouseLength)
     backtrackCounts = calculateBacktrackCounts(arm_entries)
 
+    print('Convert to cm')
+
     print('Results found for {}'.format(mouseDirectory))
     results = {
         'inner_directory': innerDirectory,
