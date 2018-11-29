@@ -40,8 +40,8 @@ def process_directory(parentDirectory, mouseDirectory):
     #     '20130123_112930_EPM_BWPOF2_1316_M',
     # ]:
     #     return {}
-    if "_767_" not in mouseDirectory:
-        return {}
+    # if "_767_" not in mouseDirectory:
+    #     return {}
 
     conditions_folder_path, innerDirectory = extractContentDirectory(mouseDirectory, parentDirectory)
     mouseFeatures = extractMouseFeatures(mouseDirectory)
