@@ -40,8 +40,8 @@ def process_directory(parentDirectory, mouseDirectory):
     #     '20130123_112930_EPM_BWPOF2_1316_M',
     # ]:
     #     return {}
-    # if "_PO_" not in mouseDirectory:
-    #     return {}
+    if "_767_" not in mouseDirectory:
+        return {}
 
     conditions_folder_path, innerDirectory = extractContentDirectory(mouseDirectory, parentDirectory)
     mouseFeatures = extractMouseFeatures(mouseDirectory)
@@ -106,8 +106,9 @@ def populateDirectoriesToUse():
             for item in row:
                 cleanPath = item.replace("'", "").strip()
                 lastSlash = cleanPath.rfind("/")
-                secondLastSlash = cleanPath[:lastSlash].rfind("/")
-                actualDirectory = cleanPath[secondLastSlash + 1:lastSlash]
+                # secondLastSlash = cleanPath[:lastSlash].rfind("/")
+                # actualDirectory = cleanPath[secondLastSlash + 1:lastSlash]
+                actualDirectory = cleanPath[:lastSlash]
                 directoriesToUse.add(actualDirectory)
 
 
@@ -140,7 +141,8 @@ def extractContentDirectory(mouseDirectory, parentDirectory):
             directoryFound = False
             for innerDirectory in innerDirectories:
                 if os.path.isdir(os.path.join(analysisDirectory, innerDirectory)):
-                    if innerDirectory in directoriesToUse:
+                    fullPath = mouseDirectory + '/analysis/' + innerDirectory
+                    if fullPath in directoriesToUse:
                         conditions_folder_path = os.path.join(analysisDirectory, innerDirectory)
                         if not os.path.isfile(os.path.join(conditions_folder_path, 'miceols.tar')):
                             raise NoDataError(

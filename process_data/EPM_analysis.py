@@ -631,51 +631,19 @@ def calculateArmEntries(zones_order, results_array, start_frame, end_frame, cond
     for arm in GOOD_ARMS:
         fractionInZones[arm] = pixelsInZones[arm] / total
 
-    fraction_in_openArms = fractionInZones['OB'] + fractionInZones['OT']
-    fraction_in_closedArms = fractionInZones['CL'] + fractionInZones['CR']
-    fraction_in_middle = fractionInZones['M']
-    fraction_in_closedAndMiddle = fraction_in_closedArms + fraction_in_middle
-    fraction_in_left = fractionInZones['CL']
-    fraction_in_right = fractionInZones['CR']
-    fraction_in_top = fractionInZones['OT']
-    fraction_in_bottom = fractionInZones['OB']
     fraction_in_arms = {
-        'open-arms': fraction_in_openArms,
-        'closed': fraction_in_closedArms,
-        'closed_and_middle': fraction_in_closedAndMiddle,
-        'middle': fraction_in_middle,
-        'left': fraction_in_left,
-        'right': fraction_in_right,
-        'top': fraction_in_top,
-        'bottom': fraction_in_bottom,
+        'open-arms': fractionInZones['OB'] + fractionInZones['OT'],
+        'closed': fractionInZones['CL'] + fractionInZones['CR'],
+        'closed_and_middle': fractionInZones['CL'] + fractionInZones['CR'] + fractionInZones['M'],
+        'middle': fractionInZones['M'],
+        'left': fractionInZones['CL'],
+        'right': fractionInZones['CR'],
+        'top': fractionInZones['OT'],
+        'bottom': fractionInZones['OB'],
     }
     arm_entries, tot_arm_entries = arm_entry(results_array, zones_order)
     # frames_in_arms assigns position of mouse to where the majority of his area is located.
     frames_in_arms = time_in_arms(results_array, zones_order)
-
-    # Plot arm residence time and arm entries
-    # figure(1, figsize=(12, 8))
-    # plot(results_array[:, 4:9])
-    # if arm_entries[4]:
-    #     scatter(arm_entries[4], 200 * ones(len(arm_entries[4])), c='b', s=40)
-    # if arm_entries[6]:
-    #     scatter(arm_entries[6], 200 * ones(len(arm_entries[6])), c='r', s=40)
-    # if arm_entries[7]:
-    #     scatter(arm_entries[7], 200 * ones(len(arm_entries[7])), c='c', s=40)
-    # if arm_entries[8]:
-    #     scatter(arm_entries[8], 200 * ones(len(arm_entries[8])), c='m', s=40)
-    # legend(zones_order[4:9])
-    # title(conditions_folder, size=10)
-    # xlim(0, results_array.shape[0])
-    # ylim(0, np.max(results_array) * 1.05)
-    # # Set ticks every minute (1800 frames is 1 minute at 30 fps)
-    # xticks(range(1800, results_array.shape[0], 1800),
-    #        [str(y) for y in range(1, int(floor(results_array.shape[0] / float(30 * 60))) + 1)])
-    # xlabel('minutes')
-    # ylabel('number of mouse pixels')
-    # savefig
-    # savefig(conditions_folder + '/arm_residence_entries.pdf')
-    # close(1)
 
     return fraction_in_arms, tot_arm_entries, frames_in_arms, arm_entries  # ,xplor_frac
 
