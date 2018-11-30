@@ -6,6 +6,9 @@ import cPickle as pickle
 import vidtools
 from pylab import *
 import pandas as pd
+from functools import reduce 
+import operator
+import copy
 
 GOOD_ARMS = {'CR', 'CL', 'OT', 'OB', 'M'}
 CLOSED_ARMS = {'CR', 'CL'}
@@ -986,3 +989,29 @@ def saveResults(conditions_folder, results_array, frac_in_arms, arm_entries, tot
     # open(conditions_folder+'/smoothedDistance.dict', 'w').write(smoothed_distance.__repr__())
     # open(conditions_folder+'/medianSpeed.dict', 'w').write(median_speed.__repr__())
     # open(conditions_folder+'/smoothedMedianSpeed.dict', 'w').write(smoothed_median_speed.__repr__())
+    
+CONVERSION_RATE =  1/5.048 # 5.048 pixels per cm
+def get_paths(d, paths, key =""):
+    
+    for k, v in d.iteritems():
+        if isinstance(v, dict):
+            get_paths(v, paths, key +str(k) + '|' )   
+        else:
+            paths.append(key + str(k))
+    
+    return paths
+
+def getFromDict(dataDict, mapList):
+    return reduce(operator.getitem, mapList, dataDict)
+
+def setInDict(dataDict, mapList, value):
+    getFromDict(dataDict, mapList[:-1])[mapList[-1]] = value
+
+def convertToCM(df):
+    dc = copy.deepcopy(df)
+    paths = get_paths(dc, [])
+    for i in paths:
+        mapList = i.split('|')
+        setInDict(dc, mapList, getFromDict(dc, mapList)*CONVERSION_RATE)
+    return dc
+    

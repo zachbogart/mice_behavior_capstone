@@ -8,6 +8,7 @@ import json
 import pandas as pd
 from datetime import datetime
 
+
 import plotly.plotly as py
 import plotly.tools as tls
 import matplotlib.pyplot as plt
@@ -29,8 +30,8 @@ def process_directory(parentDirectory, mouseDirectory):
     print('Loading data for {}'.format(mouseDirectory))
 
     # # TODO: Remove me  --  Use this to stop at only 1 mouse
-    # turnOnHistograms()
-    # if mouseDirectory not in [
+    #turnOnHistograms()
+    #if mouseDirectory not in [
     #     '20121130_163816_EPM_BWPOF1_784_M',
     #     '20121121_151056_EPM_BWPOF2_767_F',
     #     '20121121_160958_EPM_PO_758_F',
@@ -40,7 +41,7 @@ def process_directory(parentDirectory, mouseDirectory):
     #     '20130123_112930_EPM_BWPOF2_1316_M',
     # ]:
     #     return {}
-    # if "_767_" not in mouseDirectory:
+    #if "_767_" not in mouseDirectory:
     #     return {}
 
     conditions_folder_path, innerDirectory = extractContentDirectory(mouseDirectory, parentDirectory)
@@ -79,6 +80,10 @@ def process_directory(parentDirectory, mouseDirectory):
     backtrackCounts = calculateBacktrackCounts(arm_entries)
 
     print('Convert to cm')
+    
+    velocity_features = convertToCM(velocity_features)
+    totalDistancePerArm = convertToCM(totalDistancePerArm)
+    mouseSizeFeatures = convertToCM(mouseSizeFeatures)
 
     print('Results found for {}'.format(mouseDirectory))
     results = {
