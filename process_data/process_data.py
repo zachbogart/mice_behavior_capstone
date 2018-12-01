@@ -39,9 +39,10 @@ def process_directory(parentDirectory, mouseDirectory):
     #     '20130129_162312_EPM_BW_1368_F',
     #     '20130213_165903_EPM_BWPOF2_1464_M',
     #     '20130123_112930_EPM_BWPOF2_1316_M',
+    #     '20130407_180759_EPM_BWPOF2_2390_F'
     # ]:
     #     return {}
-    #if "_767_" not in mouseDirectory:
+    # if "20121121_155926_EPM_PO_760" not in mouseDirectory:
     #     return {}
 
     conditions_folder_path, innerDirectory = extractContentDirectory(mouseDirectory, parentDirectory)
@@ -106,17 +107,17 @@ def process_directory(parentDirectory, mouseDirectory):
 
 
 def populateDirectoriesToUse():
-    with open('results_files.txt') as csvfile:
+    with open('results_files_used_for_PO_BW_BWPOF1_BWPOF2_analyses_20181129.txt') as f:
         global directoriesToUse
-        spamReader = csv.reader(csvfile, delimiter=',')
-        for row in spamReader:
-            for item in row:
-                cleanPath = item.replace("'", "").strip()
-                lastSlash = cleanPath.rfind("/")
-                # secondLastSlash = cleanPath[:lastSlash].rfind("/")
-                # actualDirectory = cleanPath[secondLastSlash + 1:lastSlash]
-                actualDirectory = cleanPath[:lastSlash]
-                directoriesToUse.add(actualDirectory)
+        # spamReader = csv.reader(csvfile, delimiter=',')
+        for row in f:
+            cleanPath = row.rstrip('\n')
+            cleanPath = cleanPath[5:]
+            lastSlash = cleanPath.rfind("/")
+            # secondLastSlash = cleanPath[:lastSlash].rfind("/")
+            # actualDirectory = cleanPath[secondLastSlash + 1:lastSlash]
+            actualDirectory = cleanPath[:lastSlash]
+            directoriesToUse.add(actualDirectory)
 
 
 def getStartEndFrames(conditions_folder_path):
@@ -140,7 +141,7 @@ def extractContentDirectory(mouseDirectory, parentDirectory):
         raise NoDataError('No .zones.dict inside conditions directory for: {}'.format(mouseDirectory))
 
     conditions_folder_path = None
-    innerDirectory = None
+    actualInnerDirectory = ''
     analysisDirectory = os.path.join(parentDirectory, mouseDirectory, 'analysis')
     if os.path.isdir(analysisDirectory):
         innerDirectories = os.listdir(analysisDirectory)
@@ -156,19 +157,20 @@ def extractContentDirectory(mouseDirectory, parentDirectory):
                                 'No miceols.tar inside conditions directory for: {}'.format(mouseDirectory))
                         else:
                             directoryFound = True
+                            actualInnerDirectory = innerDirectory
             if not directoryFound:
                 raise NoDataError('No inner folders found for: {}'.format(mouseDirectory))
         else:
             raise NoDataError('No directories found inside analysis directory for: {}'.format(mouseDirectory))
     else:
         raise NoDataError('No analysis directory found for: {}'.format(mouseDirectory))
-    return conditions_folder_path, innerDirectory
+    return conditions_folder_path, actualInnerDirectory
 
 
 def getMouseDirectories():
     currentDirectory = os.getcwd()
-    parentDirectory = os.path.join(currentDirectory, "Mice_Capstone_data_files")
-    # parentDirectory = os.path.join(currentDirectory, "EPM_data")
+    # parentDirectory = os.path.join(currentDirectory, "Mice_Capstone_data_files")
+    parentDirectory = os.path.join(currentDirectory, "EPM_data")
     mouseDirectories = os.listdir(parentDirectory)
     mouseDirectories.sort()
     return parentDirectory, mouseDirectories
