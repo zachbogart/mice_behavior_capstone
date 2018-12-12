@@ -29,8 +29,8 @@ def process_directory(parentDirectory, mouseDirectory):
     print('')
     print('Loading data for {}'.format(mouseDirectory))
 
-    # # TODO: Remove me  --  Use this to stop at only 1 mouse
-    #turnOnHistograms()
+    #Remove me  --  Use this to stop at only select mice
+
     #if mouseDirectory not in [
     #     '20121130_163816_EPM_BWPOF1_784_M',
     #     '20121121_151056_EPM_BWPOF2_767_F',
@@ -42,8 +42,9 @@ def process_directory(parentDirectory, mouseDirectory):
     #     '20130407_180759_EPM_BWPOF2_2390_F'
     # ]:
     #     return {}
-    # if "20121121_155926_EPM_PO_760" not in mouseDirectory:
+    # if "_758" not in mouseDirectory:
     #     return {}
+    # turnOnHistograms()
 
     conditions_folder_path, innerDirectory = extractContentDirectory(mouseDirectory, parentDirectory)
     mouseFeatures = extractMouseFeatures(mouseDirectory)
@@ -65,13 +66,13 @@ def process_directory(parentDirectory, mouseDirectory):
     )
     turningPreferences = calculateTurningPreference(arm_entries)
 
-    print('Finding mouse size')
-    mouseSizeFeatures = calculateMouseLength(boundaries)
-    mouseLength = mouseSizeFeatures['mouseLength']
-
     print('Finding velocity features')
-    distancesPerArm, directionsPerArm, totalDistancePerArm = calculateDistanceFeatures(centroidsByArm)
+    distancesPerArm, directionsPerArm, totalDistancePerArm, distances = calculateDistanceFeatures(centroidsByArm, centroids)
     velocity_features = calculateVelocityFeatures(distancesPerArm, directionsPerArm)
+
+    print('Finding mouse size')
+    mouseSizeFeatures = calculateMouseLength(boundaries, distances)
+    mouseLength = mouseSizeFeatures['mouseLength']
 
     print('Finding miscellaneous features')
     restFractionPerArm = calculateRestFeatures(distancesPerArm)
@@ -169,7 +170,7 @@ def extractContentDirectory(mouseDirectory, parentDirectory):
 
 def getMouseDirectories():
     currentDirectory = os.getcwd()
-    # parentDirectory = os.path.join(currentDirectory, "Mice_Capstone_data_files")
+    # parentDirectory = os.path.join(currentDirectory, "EPM_data")
     parentDirectory = os.path.join(currentDirectory, "EPM_data")
     mouseDirectories = os.listdir(parentDirectory)
     mouseDirectories.sort()
