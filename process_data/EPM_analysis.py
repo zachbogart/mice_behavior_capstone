@@ -529,18 +529,24 @@ def testDistance(centroids):
     # print('done')
 
 
-def calculateDistanceFeatures(centroidsByArm):
+def calculateDistanceFeatures(centroidsByArm, centroids):
     distancesPerArm, directionsPerArm = calculateDistancesByArm(centroidsByArm)  # In pixels
+    distances = calculateDistances(centroids)
+    distancesSmoothed = smoothDistances(distances)
     # totalDistancePerArm = calculateTotalDistancePerArm(distancesPerArm)
 
     distancesPerArmSmoothed = smoothDistancesByArm(distancesPerArm)
     totalDistancePerArmSmoothed = calculateTotalDistancePerArm(distancesPerArmSmoothed)
 
-    return distancesPerArmSmoothed, directionsPerArm, totalDistancePerArmSmoothed
+    return distancesPerArmSmoothed, directionsPerArm, totalDistancePerArmSmoothed, distancesSmoothed
 
 
 def smoothDistancesByArm(distancesPerArm):
     return {arm: smooth(np.array(distances)) for arm, distances in distancesPerArm.items()}
+
+
+def smoothDistances(distances):
+    return smooth(np.array(distances))
 
 
 def calculateTotalDistancePerArm(distancesPerArm):
@@ -573,6 +579,17 @@ def calculateDistancesByArm(centroidsByArm):
                     distancesPerArm[arm].append(vectorLength)
                     directionsPerArm[arm].append(vectorDirection)
     return distancesPerArm, directionsPerArm
+
+
+def calculateDistances(centroids):
+    distances = []
+    for frame in range(len(centroids) - 1):
+        point1 = centroids[frame]
+        point2 = centroids[frame + 1]
+        if point1 and point2:
+            vectorLength, vectorDirection = calculateVectorStatistics(point1, point2)
+            distances.append(vectorLength)
+    return distances
 
 
 def calculateVectorStatistics(point1, point2):
@@ -818,11 +835,11 @@ def calculateAverageOfPercentile(list):
     return np.mean(sortedList[indexLower:indexUpper + 1])
 
 
-def calculateMouseLength(boundaries):
+def calculateMouseLength(boundaries, distances):
     mouseLengthOverTime = []
     mouseWidthOverTime = []
-    for boundaryPoints in boundaries:
-        if boundaryPoints:
+    for index, boundaryPoints in enumerate(boundaries[:-1]):
+        if boundaryPoints and not isResting(distances[index]):
             boundaryPoints = boundaryPoints[0]
             xMax, xMin, yMax, yMin = findBoundaryBox(boundaryPoints)
             mouseWidth = xMax - xMin
@@ -881,7 +898,7 @@ def extractMouseFeatures(outer_directory):
 
 
 def makeHistogram(dataList, title='Hist', verticalLines=[], percentiles=[]):
-    if not TESTING_RUN__SAVE_GRAPHS:
+    if not TESTING_RUN__SAVE_GRAPHS or not len(dataList):
         return
     fig = plt.figure(figsize=(20, 10))
 
