@@ -1036,3 +1036,10 @@ def convertToCM(df):
         mapList = i.split('|')
         setInDict(dc, mapList, getFromDict(dc, mapList) * CONVERSION_RATE)
     return dc
+
+
+def mouseLengthIsValid(mouseLength):
+    mouseLengthCM = mouseLength * CONVERSION_RATE
+    if mouseLengthCM < 4:
+        return False
+    return True

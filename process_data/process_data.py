@@ -22,6 +22,7 @@ class NoDataError(Exception):
 directoriesToUse = set()
 
 
+
 def process_directory(parentDirectory, mouseDirectory):
     populateDirectoriesToUse()
     setMouseDirectory(mouseDirectory)
@@ -42,7 +43,7 @@ def process_directory(parentDirectory, mouseDirectory):
     #     '20130407_180759_EPM_BWPOF2_2390_F'
     # ]:
     #     return {}
-    # if "_758" not in mouseDirectory:
+    # if "_861" not in mouseDirectory:
     #     return {}
     # turnOnHistograms()
 
@@ -74,12 +75,22 @@ def process_directory(parentDirectory, mouseDirectory):
     mouseSizeFeatures = calculateMouseLength(boundaries, distances)
     mouseLength = mouseSizeFeatures['mouseLength']
 
+    # Some mice don't move around enough to get a good reading. If this happens we want to exclude the mouse
+    mouseLengthValid = mouseLengthIsValid(mouseLength)
+    if mouseLengthIsValid:
+        mouseSizeFeatures = {}
+
     print('Finding miscellaneous features')
     restFractionPerArm = calculateRestFeatures(distancesPerArm)
-    safetyFractionsPerArm = calculateSafetyFeatures(centroidsByArm, mouseLength)
-    safetyAndRestFractionsPerArm = calculateSafeAndRestingFeatures(centroidsByArm, distancesPerArm, mouseLength)
-    peakingFeatures = calculatePeekingFeatures(centroidsByArm, distancesPerArm, mouseLength)
     backtrackCounts = calculateBacktrackCounts(arm_entries)
+    if mouseLengthValid: # If the mouse length is not valid, neither are these these features
+        safetyFractionsPerArm = calculateSafetyFeatures(centroidsByArm, mouseLength)
+        safetyAndRestFractionsPerArm = calculateSafeAndRestingFeatures(centroidsByArm, distancesPerArm, mouseLength)
+        peakingFeatures = calculatePeekingFeatures(centroidsByArm, distancesPerArm, mouseLength)
+    else:
+        safetyFractionsPerArm = {}
+        safetyAndRestFractionsPerArm = {}
+        peakingFeatures = {}
 
     print('Convert to cm')
     
