@@ -1,6 +1,10 @@
 import csv
 
-from feature_engineering import *
+# from feature_engineering import *
+from logging import exception
+
+from mice_behavior_capstone.features.feature_engineering import *
+
 
 import sys
 import os
@@ -181,7 +185,6 @@ def extractContentDirectory(mouseDirectory, parentDirectory):
 
 def getMouseDirectories():
     currentDirectory = os.getcwd()
-    # parentDirectory = os.path.join(currentDirectory, "EPM_data")
     parentDirectory = os.path.join(currentDirectory, "EPM_data")
     mouseDirectories = os.listdir(parentDirectory)
     mouseDirectories.sort()
@@ -210,7 +213,7 @@ def main():
             if mouseResults:
                 flatResults = flattenDict(mouseResults)
                 aggregateResults.append(flatResults)
-        except NoDataError, exception:  # TODO Index Error fix?
+        except (NoDataError, exception):  # TODO Index Error fix?
             print('Exception: {}'.format(exception))
     # saveResultsAsJson(aggregateResults)
     saveResultsAsCSV(aggregateResults)

@@ -1,12 +1,21 @@
 from collections import defaultdict
 
 import tarfile
-from features.resources import vidtools, Util
-from pylab import *
+
+from mice_behavior_capstone.features.resources import vidtools, Util
+
+# from resources.Util import *
+# from pylab import *
+
 from functools import reduce
 import operator
 import copy
 import os
+import sys
+import pickle
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 GOOD_ARMS = {'CR', 'CL', 'OT', 'OB', 'M'}
 CLOSED_ARMS = {'CR', 'CL'}
@@ -618,14 +627,14 @@ def smooth(x, window_len=10, window='flat'):
     """
 
     if x.ndim != 1:
-        raise ValueError, "smooth only accepts 1 dimension arrays."
+        raise ValueError("smooth only accepts 1 dimension arrays.")
     if x.size < window_len:
         return x
         # raise ValueError, "Input vector needs to be bigger than window size."
     if window_len < 3:
         return x
     if window not in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+        raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
     s = np.r_[x[window_len - 1:0:-1], x, x[-1:-window_len:-1]]
     # print(len(s))
     if window == 'flat':  # moving average
@@ -827,7 +836,7 @@ def calculateAverageOfPercentile(list):
     percentileLower = 85. / 100
     percentileUpper = 95. / 100
 
-    sortedList = sort(list)
+    sortedList = sorted(list)
     indexLower = int(percentileLower * len(sortedList))
     indexUpper = int(percentileUpper * len(sortedList))
     return np.mean(sortedList[indexLower:indexUpper + 1])
