@@ -8,7 +8,7 @@ library(gridExtra)
 ```
 
 ```{r}
-# setwd("~/Desktop/mice_behavior_capstone/process_data/results")
+# setwd("~/Desktop/mice_behavior_capstone/features/results")
 df <- read.csv('all_the_data.csv')
 df$count  = 1 
 
