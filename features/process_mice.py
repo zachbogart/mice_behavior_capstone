@@ -12,7 +12,6 @@ import json
 import pandas as pd
 from datetime import datetime
 
-
 import plotly.plotly as py
 import plotly.tools as tls
 import matplotlib.pyplot as plt
